@@ -4,17 +4,19 @@
   "service": "api",
   "workspaceFolder": "/app",
   "shutdownAction": "stopCompose",
-  
-  // コンテナ作成後の初期設定
-  "postCreateCommand": "git config --global --add safe.directory /app && lefthook install",
-  
+  // ビルド引数を明示的に設定
+  "build": {
+    "args": {
+      "BUILD_ENV": "development"
+    }
+  },
+  "postCreateCommand": "git config --global --add safe.directory /app && lefthook install && uv sync --frozen --all-extras",
   // 開発に必要な機能を追加
   "features": {
     "ghcr.io/devcontainers/features/git:1": {
       "version": "latest"
     }
   },
-  
   // VS Code の設定
   "customizations": {
     "vscode": {
@@ -32,7 +34,6 @@
         "redhat.vscode-yaml",
         "ms-vscode.makefile-tools"
       ],
-      
       // VS Code の設定
       "settings": {
         "python.defaultInterpreter": "/app/.venv/bin/python",
@@ -62,9 +63,11 @@
       }
     }
   },
-  
   // ポートフォワーディング
-  "forwardPorts": [8000, 8501],
+  "forwardPorts": [
+    8000,
+    8501
+  ],
   "portsAttributes": {
     "8000": {
       "label": "FastAPI",
@@ -75,13 +78,11 @@
       "onAutoForward": "notify"
     }
   },
-  
   // 環境変数
   "remoteEnv": {
     "PYTHONPATH": "/app",
     "PATH": "/app/.venv/bin:${containerEnv:PATH}"
   },
-  
   // コンテナ実行ユーザー
   "remoteUser": "root"
 }
