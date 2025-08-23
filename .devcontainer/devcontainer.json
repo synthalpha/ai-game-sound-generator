@@ -1,0 +1,88 @@
+{
+  "name": "AI Game Sound Generator",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "api",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose",
+  // ビルド引数を明示的に設定
+  "build": {
+    "args": {
+      "BUILD_ENV": "development"
+    }
+  },
+  "postCreateCommand": "git config --global --add safe.directory /app && lefthook install && uv sync --frozen --all-extras",
+  // 開発に必要な機能を追加
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    }
+  },
+  // VS Code の設定
+  "customizations": {
+    "vscode": {
+      // インストールする拡張機能
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "ms-python.debugpy",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "tamasfe.even-better-toml",
+        "redhat.vscode-yaml",
+        "ms-vscode.makefile-tools"
+      ],
+      // VS Code の設定
+      "settings": {
+        "python.defaultInterpreter": "/app/.venv/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.formatting.provider": "none",
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+          }
+        },
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "editor.formatOnSave": true,
+        "files.watcherExclude": {
+          "**/.git/objects/**": true,
+          "**/.git/subtree-cache/**": true,
+          "**/node_modules/**": true,
+          "**/.venv/**": true,
+          "**/__pycache__/**": true,
+          "**/.pytest_cache/**": true,
+          "**/.ruff_cache/**": true
+        }
+      }
+    }
+  },
+  // ポートフォワーディング
+  "forwardPorts": [
+    8000,
+    8501
+  ],
+  "portsAttributes": {
+    "8000": {
+      "label": "FastAPI",
+      "onAutoForward": "notify"
+    },
+    "8501": {
+      "label": "Streamlit",
+      "onAutoForward": "notify"
+    }
+  },
+  // 環境変数
+  "remoteEnv": {
+    "PYTHONPATH": "/app",
+    "PATH": "/app/.venv/bin:${containerEnv:PATH}"
+  },
+  // コンテナ実行ユーザー
+  "remoteUser": "root"
+}

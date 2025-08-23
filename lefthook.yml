@@ -1,0 +1,59 @@
+# lefthook.yml
+# Git hooks configuration for ai-game-sound-generator
+
+pre-commit:
+  parallel: true
+  commands:
+    ruff-check:
+      glob: "*.py"
+      # Dev Containers 内では直接実行、外部では Docker 経由
+      run: |
+        if [ -f /.dockerenv ] || [ -n "$DEVCONTAINER" ]; then
+          uv run ruff check {staged_files}
+        else
+          docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && uv run ruff check {staged_files}"
+        fi
+      stage_fixed: true
+    
+    ruff-format:
+      glob: "*.py"
+      run: |
+        if [ -f /.dockerenv ] || [ -n "$DEVCONTAINER" ]; then
+          uv run ruff format {staged_files}
+        else
+          docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && uv run ruff format {staged_files}"
+        fi
+      stage_fixed: true
+
+pre-push:
+  parallel: true
+  commands:
+    # TODO: テストが充実したら有効化する
+    # pytest:
+    #   run: |
+    #     if [ -f /.dockerenv ] || [ -n "$DEVCONTAINER" ]; then
+    #       uv run pytest --cov-fail-under=80
+    #     else
+    #       docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && uv run pytest --cov-fail-under=80"
+    #     fi
+    #   skip:
+    #     - merge
+    #     - rebase
+
+commit-msg:
+  commands:
+    check-message:
+      run: |
+        # コミットメッセージの検証
+        # 例: feat:, fix:, docs:, style:, refactor:, test:, chore:
+        if ! grep -qE "^(feat|fix|docs|style|refactor|test|chore):" {1}; then
+          echo "コミットメッセージは以下のプレフィックスで始める必要があります:"
+          echo "  feat: 新機能"
+          echo "  fix: バグ修正"
+          echo "  docs: ドキュメント変更"
+          echo "  style: コードスタイル変更"
+          echo "  refactor: リファクタリング"
+          echo "  test: テスト追加・修正"
+          echo "  chore: その他の変更"
+          exit 1
+        fi

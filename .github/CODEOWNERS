@@ -1,0 +1,26 @@
+# コードオーナー設定
+# このファイルで指定されたオーナーは、該当ファイルへのPRで自動的にレビュアーに追加されます
+
+# デフォルトオーナー
+* @minatoigarashi
+
+# ドキュメント
+/docs/ @minatoigarashi
+*.md @minatoigarashi
+
+# アーキテクチャコア
+/src/entities/ @minatoigarashi
+/src/usecases/ @minatoigarashi
+
+# インフラストラクチャ
+/src/adapters/ @minatoigarashi
+/src/di_container/ @minatoigarashi
+
+# UI/プレゼンテーション
+/src/app/ @minatoigarashi
+/src/controllers/ @minatoigarashi
+
+# 設定ファイル
+/.github/ @minatoigarashi
+/.*rc @minatoigarashi
+/.*config.* @minatoigarashi

@@ -1,0 +1,97 @@
+services:
+  # FastAPI サービス（Dev Containers 対応）
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: ${DOCKER_ENV:-development}
+    container_name: ai-sound-api
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      # Dev Containers 用にプロジェクト全体をマウント
+      - .:/app:cached
+      # Git 設定を共有
+      - ~/.gitconfig:/root/.gitconfig:ro
+      # SSH キーを共有（Git 操作用）
+      - ~/.ssh:/root/.ssh:ro
+      - vscode-extensions:/root/.vscode-server/extensions
+      - vscode-extensions-insiders:/root/.vscode-server-insiders/extensions
+    environment:
+      - PYTHONPATH=/app
+      - SERVICE_TYPE=api
+      - RELOAD=${DOCKER_HOT_RELOAD:+--reload}
+    env_file:
+      - .env
+    networks:
+      - ai-sound-network
+    restart: ${DOCKER_RESTART_POLICY:-unless-stopped}
+    command: sleep infinity
+
+  # Streamlit サービス
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: ${DOCKER_ENV:-production}
+    container_name: ai-sound-streamlit
+    ports:
+      - "${STREAMLIT_PORT:-8501}:8501"
+    volumes:
+      - ./src:/app/src:${DOCKER_ENV:+cached}
+      - ./.env:/app/.env:ro
+      - ./.streamlit:/app/.streamlit:ro
+    environment:
+      - PYTHONPATH=/app
+      - SERVICE_TYPE=streamlit
+    env_file:
+      - .env
+    networks:
+      - ai-sound-network
+    depends_on:
+      - api
+    restart: ${DOCKER_RESTART_POLICY:-unless-stopped}
+
+  # PostgreSQL データベース（将来用）
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: ai-sound-db
+  #   ports:
+  #     - "${DB_PORT:-5432}:5432"
+  #   environment:
+  #     - POSTGRES_USER=${DB_USER:-aiuser}
+  #     - POSTGRES_PASSWORD=${DB_PASSWORD:-aipass}
+  #     - POSTGRES_DB=${DB_NAME:-aigamesound}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - ai-sound-network
+  #   restart: ${RESTART_POLICY:-unless-stopped}
+
+  # Redis キャッシュ（将来用）
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: ai-sound-redis
+  #   ports:
+  #     - "${REDIS_PORT:-6379}:6379"
+  #   command: redis-server --appendonly yes
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - ai-sound-network
+  #   restart: ${RESTART_POLICY:-unless-stopped}
+
+networks:
+  ai-sound-network:
+    driver: bridge
+
+# ボリューム定義（VS Code 拡張機能のキャッシュ用）
+volumes:
+  vscode-extensions:
+  vscode-extensions-insiders:
+
+# volumes:
+#   postgres_data:
+#   redis_data:
