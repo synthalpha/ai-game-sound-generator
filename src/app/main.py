@@ -2,9 +2,9 @@
 
 import streamlit as st
 
-from app.components.tag_selector import render_tag_selector
-from app.config.settings import apply_custom_css, configure_page
-from controllers.streamlit.generator_controller import (
+from src.app.components.tag_selector import render_tag_selector
+from src.app.config.settings import apply_custom_css, configure_page
+from src.controllers.streamlit.generator_controller import (
     GenerationRequest,
     StreamlitGeneratorController,
 )

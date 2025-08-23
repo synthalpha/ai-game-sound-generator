@@ -1,18 +1,23 @@
 services:
-  # FastAPI サービス
+  # FastAPI サービス（Dev Containers 対応）
   api:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        BUILD_ENV: ${DOCKER_ENV:-production}
+        BUILD_ENV: ${DOCKER_ENV:-development}
     container_name: ai-sound-api
     ports:
       - "${API_PORT:-8000}:8000"
     volumes:
-      - ./src:/app/src:${DOCKER_ENV:+cached}
-      - ./tests:/app/tests:${DOCKER_ENV:+cached}
-      - ./.env:/app/.env:ro
+      # Dev Containers 用にプロジェクト全体をマウント
+      - .:/app:cached
+      # Git 設定を共有
+      - ~/.gitconfig:/root/.gitconfig:ro
+      # SSH キーを共有（Git 操作用）
+      - ~/.ssh:/root/.ssh:ro
+      - vscode-extensions:/root/.vscode-server/extensions
+      - vscode-extensions-insiders:/root/.vscode-server-insiders/extensions
     environment:
       - PYTHONPATH=/app
       - SERVICE_TYPE=api
@@ -22,6 +27,7 @@ services:
     networks:
       - ai-sound-network
     restart: ${DOCKER_RESTART_POLICY:-unless-stopped}
+    command: sleep infinity
 
   # Streamlit サービス
   streamlit:
@@ -80,6 +86,11 @@ services:
 networks:
   ai-sound-network:
     driver: bridge
+
+# ボリューム定義（VS Code 拡張機能のキャッシュ用）
+volumes:
+  vscode-extensions:
+  vscode-extensions-insiders:
 
 # volumes:
 #   postgres_data:

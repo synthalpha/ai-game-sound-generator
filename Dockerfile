@@ -12,15 +12,20 @@ ENV PATH="/root/.local/bin:$PATH"
 
 COPY pyproject.toml uv.lock ./
 
-# ビルド引数で環境を指定（デフォルトは本番）
-ARG BUILD_ENV=production
+# ビルド引数で環境を指定
+ARG BUILD_ENV=development
+
+RUN apt-get update && apt-get install -y \
+    git \
+    make \
+    vim \
+    less \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN if [ "$BUILD_ENV" = "development" ]; then \
-        apt-get update && apt-get install -y git make && \
-        apt-get clean && rm -rf /var/lib/apt/lists/* && \
-        uv sync --frozen --all-extras; \
+    uv sync --frozen --all-extras; \
     else \
-        uv sync --frozen --no-dev; \
+    uv sync --frozen --no-dev; \
     fi
 
 COPY . .
@@ -32,8 +37,8 @@ ENV PYTHONUNBUFFERED=1 \
 
 # 本番環境の場合は非rootユーザー作成
 RUN if [ "$BUILD_ENV" = "production" ]; then \
-        useradd -m -u 1000 appuser && \
-        chown -R appuser:appuser /app; \
+    useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app; \
     fi
 
 EXPOSE 8000 8501

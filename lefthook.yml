@@ -6,19 +6,35 @@ pre-commit:
   commands:
     ruff-check:
       glob: "*.py"
-      run: docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && .venv/bin/ruff check {staged_files}"
+      # Dev Containers 内では直接実行、外部では Docker 経由
+      run: |
+        if [ -f /.dockerenv ] || [ -n "$DEVCONTAINER" ]; then
+          ruff check {staged_files}
+        else
+          docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && .venv/bin/ruff check {staged_files}"
+        fi
       stage_fixed: true
     
     ruff-format:
       glob: "*.py"
-      run: docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && .venv/bin/ruff format {staged_files}"
+      run: |
+        if [ -f /.dockerenv ] || [ -n "$DEVCONTAINER" ]; then
+          ruff format {staged_files}
+        else
+          docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && .venv/bin/ruff format {staged_files}"
+        fi
       stage_fixed: true
 
 pre-push:
   parallel: true
   commands:
     pytest:
-      run: docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && .venv/bin/pytest --cov-fail-under=80"
+      run: |
+        if [ -f /.dockerenv ] || [ -n "$DEVCONTAINER" ]; then
+          pytest --cov-fail-under=80
+        else
+          docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && .venv/bin/pytest --cov-fail-under=80"
+        fi
       skip:
         - merge
         - rebase
