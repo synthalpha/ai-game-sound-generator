@@ -1,0 +1,42 @@
+# lefthook.yml
+# Git hooks configuration for ai-game-sound-generator
+
+pre-commit:
+  parallel: true
+  commands:
+    ruff-check:
+      glob: "*.py"
+      run: uv run ruff check {staged_files}
+      stage_fixed: true
+    
+    ruff-format:
+      glob: "*.py"
+      run: uv run ruff format {staged_files}
+      stage_fixed: true
+
+pre-push:
+  parallel: true
+  commands:
+    pytest:
+      run: uv run pytest --cov-fail-under=80
+      skip:
+        - merge
+        - rebase
+
+commit-msg:
+  commands:
+    check-message:
+      run: |
+        # コミットメッセージの検証
+        # 例: feat:, fix:, docs:, style:, refactor:, test:, chore:
+        if ! grep -qE "^(feat|fix|docs|style|refactor|test|chore):" {1}; then
+          echo "コミットメッセージは以下のプレフィックスで始める必要があります:"
+          echo "  feat: 新機能"
+          echo "  fix: バグ修正"
+          echo "  docs: ドキュメント変更"
+          echo "  style: コードスタイル変更"
+          echo "  refactor: リファクタリング"
+          echo "  test: テスト追加・修正"
+          echo "  chore: その他の変更"
+          exit 1
+        fi
