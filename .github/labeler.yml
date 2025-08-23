@@ -1,0 +1,43 @@
+# ファイルパスベースの自動ラベル付け設定
+
+# UI関連
+"area: ui":
+  - src/app/**/*
+  - src/controllers/streamlit/**/*
+  - .streamlit/**/*
+
+# API関連
+"area: api":
+  - src/api/**/*
+  - src/controllers/api/**/*
+
+# コアロジック
+"area: core":
+  - src/entities/**/*
+  - src/usecases/**/*
+
+# インフラ
+"area: infrastructure":
+  - src/adapters/**/*
+  - src/di_container/**/*
+  - docker*
+  - Dockerfile*
+  - .github/**/*
+
+# テスト
+"area: testing":
+  - tests/**/*
+  - "**/*test*"
+
+# ドキュメント
+"documentation":
+  - "**/*.md"
+  - docs/**/*
+
+# 設定ファイル
+"chore":
+  - ".*"
+  - "*.yml"
+  - "*.yaml"
+  - "*.toml"
+  - Makefile
