@@ -22,6 +22,13 @@ RUN apt-get update && apt-get install -y \
     less \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# lefthookをインストール
+RUN apt-get update && apt-get install -y golang-go && \
+    go install github.com/evilmartians/lefthook@latest && \
+    mv /root/go/bin/lefthook /usr/local/bin/ && \
+    apt-get remove -y golang-go && apt-get autoremove -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 RUN if [ "$BUILD_ENV" = "development" ]; then \
     uv sync --frozen --all-extras; \
     else \
