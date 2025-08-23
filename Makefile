@@ -3,8 +3,9 @@
 # デフォルトターゲット
 .DEFAULT_GOAL := help
 
-# uvのパスを設定
-UV := $(HOME)/.local/bin/uv
+# Docker Composeコマンドを設定
+DC := docker compose
+DC_RUN := $(DC) run --rm
 
 # ヘルプ表示
 help: ## このヘルプメッセージを表示
@@ -14,10 +15,10 @@ help: ## このヘルプメッセージを表示
 
 # 環境セットアップ
 install: ## 本番用依存関係をインストール
-	$(UV) sync
+	$(DC) build
 
 dev-install: ## 開発用依存関係を含めてインストール
-	$(UV) sync --all-extras
+	$(DC) build --build-arg BUILD_ENV=development
 
 setup: dev-install ## 初期セットアップ（依存関係インストール + Git hooks設定）
 	lefthook install
@@ -29,44 +30,44 @@ setup: dev-install ## 初期セットアップ（依存関係インストール 
 
 # コード品質
 lint: ## Ruffでコードをチェック
-	$(UV) run ruff check .
+	$(DC_RUN) api ruff check .
 
 format: ## Ruffでコードをフォーマット
-	$(UV) run ruff format .
+	$(DC_RUN) api ruff format .
 
 check: ## lintとformatをチェックモードで実行
-	$(UV) run ruff check .
-	$(UV) run ruff format --check .
+	$(DC_RUN) api ruff check .
+	$(DC_RUN) api ruff format --check .
 
 fix: ## 自動修正可能な問題を修正
-	$(UV) run ruff check --fix .
-	$(UV) run ruff format .
+	$(DC_RUN) api ruff check --fix .
+	$(DC_RUN) api ruff format .
 
 # テスト
 test: ## テストを実行
-	$(UV) run pytest
+	$(DC_RUN) api pytest
 
 test-verbose: ## テストを詳細モードで実行
-	$(UV) run pytest -v
+	$(DC_RUN) api pytest -v
 
 test-cov: ## カバレッジ付きでテストを実行
-	$(UV) run pytest --cov=src --cov-report=term-missing --cov-report=html
+	$(DC_RUN) api pytest --cov=src --cov-report=term-missing --cov-report=html
 
 test-watch: ## ファイル変更を監視してテストを自動実行
-	$(UV) run pytest-watch
+	$(DC_RUN) api pytest-watch
 
 # 開発サーバー
 run: ## 開発サーバーを起動（FastAPI）
-	$(UV) run uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+	$(DC) up api
 
 run-prod: ## 本番モードでサーバーを起動（FastAPI）
-	$(UV) run uvicorn src.main:app --host 0.0.0.0 --port 8000
+	DOCKER_ENV=production $(DC) up api
 
 streamlit: ## Streamlit UIを起動
-	$(UV) run streamlit run src/app/main.py --server.port 8501 --server.address 0.0.0.0
+	$(DC) up streamlit
 
 streamlit-dev: ## Streamlit UIを開発モードで起動
-	$(UV) run streamlit run src/app/main.py --server.port 8501 --server.address 0.0.0.0 --server.runOnSave true
+	DOCKER_HOT_RELOAD=true $(DC) up streamlit
 
 # Docker関連
 docker-build: ## Dockerイメージをビルド
@@ -130,11 +131,11 @@ pr-list: ## プルリクエストを一覧表示
 # 開発ワークフロー
 dev: ## 開発環境を起動（Streamlit UI）
 	@echo "🚀 Streamlit UIを起動します..."
-	$(MAKE) streamlit-dev
+	DOCKER_HOT_RELOAD=true $(DC) up streamlit
 
 api: ## API開発環境を起動（FastAPI）
 	@echo "🚀 FastAPI開発サーバーを起動します..."
-	$(MAKE) run
+	$(DC) up api
 
 ci: ## CI環境で実行するコマンド（lint, format check, test）
 	$(MAKE) check
@@ -147,7 +148,8 @@ pre-commit: ## コミット前チェック（手動実行用）
 # 情報表示
 info: ## プロジェクト情報を表示
 	@echo "プロジェクト: AI Game Sound Generator"
-	@echo "Python: $$(uv run python --version)"
-	@echo "uv: $$(uv --version)"
+	@echo "Python: $$($(DC_RUN) api python --version)"
+	@echo "Docker: $$(docker --version)"
+	@echo "Docker Compose: $$(docker compose version)"
 	@echo "依存関係:"
-	@$(UV) pip list
+	@$(DC_RUN) api pip list
