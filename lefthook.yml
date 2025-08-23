@@ -6,19 +6,19 @@ pre-commit:
   commands:
     ruff-check:
       glob: "*.py"
-      run: docker compose run --rm -T -e PYTHONPATH=/app api python -m ruff check {staged_files}
+      run: docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && .venv/bin/ruff check {staged_files}"
       stage_fixed: true
     
     ruff-format:
       glob: "*.py"
-      run: docker compose run --rm -T -e PYTHONPATH=/app api python -m ruff format {staged_files}
+      run: docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && .venv/bin/ruff format {staged_files}"
       stage_fixed: true
 
 pre-push:
   parallel: true
   commands:
     pytest:
-      run: docker compose run --rm -T -e PYTHONPATH=/app api python -m pytest --cov-fail-under=80
+      run: docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && .venv/bin/pytest --cov-fail-under=80"
       skip:
         - merge
         - rebase

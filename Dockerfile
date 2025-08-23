@@ -18,7 +18,7 @@ ARG BUILD_ENV=production
 RUN if [ "$BUILD_ENV" = "development" ]; then \
         apt-get update && apt-get install -y git make && \
         apt-get clean && rm -rf /var/lib/apt/lists/* && \
-        uv sync --frozen; \
+        uv sync --frozen --all-extras; \
     else \
         uv sync --frozen --no-dev; \
     fi
