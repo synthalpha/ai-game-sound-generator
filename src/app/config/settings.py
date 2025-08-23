@@ -27,7 +27,7 @@ def apply_custom_css():
         .main {
             padding-top: 2rem;
         }
-        
+
         /* ボタンスタイル */
         .stButton > button {
             width: 100%;
@@ -35,17 +35,17 @@ def apply_custom_css():
             height: 3rem;
             font-weight: 600;
         }
-        
+
         /* サイドバー */
         .css-1d391kg {
             padding-top: 2rem;
         }
-        
+
         /* タグ選択 */
         .stMultiSelect {
             margin-bottom: 1rem;
         }
-        
+
         /* プログレスバー */
         .stProgress > div > div > div > div {
             background-color: #4CAF50;

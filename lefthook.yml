@@ -6,19 +6,19 @@ pre-commit:
   commands:
     ruff-check:
       glob: "*.py"
-      run: uv run ruff check {staged_files}
+      run: docker compose run --rm api ruff check {staged_files}
       stage_fixed: true
     
     ruff-format:
       glob: "*.py"
-      run: uv run ruff format {staged_files}
+      run: docker compose run --rm api ruff format {staged_files}
       stage_fixed: true
 
 pre-push:
   parallel: true
   commands:
     pytest:
-      run: uv run pytest --cov-fail-under=80
+      run: docker compose run --rm api pytest --cov-fail-under=80
       skip:
         - merge
         - rebase

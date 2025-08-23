@@ -34,8 +34,4 @@ async def health_check():
 @app.get("/api/v1/status")
 async def status():
     """ステータス確認エンドポイント"""
-    return {
-        "service": "AI Game Sound Generator",
-        "version": "0.1.0",
-        "status": "operational"
-    }
+    return {"service": "AI Game Sound Generator", "version": "0.1.0", "status": "operational"}
