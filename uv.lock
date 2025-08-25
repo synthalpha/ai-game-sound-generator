@@ -9,6 +9,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "cryptography" },
     { name = "dependency-injector" },
+    { name = "elevenlabs" },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "pydantic" },
@@ -42,6 +43,7 @@ dev = [
 requires-dist = [
     { name = "cryptography", specifier = ">=45.0.6" },
     { name = "dependency-injector", specifier = ">=4.43.0" },
+    { name = "elevenlabs", specifier = ">=2.12.1" },
     { name = "fastapi", specifier = ">=0.116.0" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "pydantic", specifier = ">=2.10.0" },
@@ -499,6 +501,23 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/65/f9/2a408d460eedb264f7ea919754c526c8f3a18c026496cacb7dd6960766d2/dependency_injector-4.48.1-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:1994622eae8917138626303b176cba4c74e625ba1e588cb09d673ca175d299a2", size = 1863948, upload-time = "2025-06-20T10:21:31.951Z" },
     { url = "https://files.pythonhosted.org/packages/6e/8a/2edaef77e725dd8b1a625c84cbccb0f445afe58277c7b243cbf58784826a/dependency_injector-4.48.1-cp38-abi3-win32.whl", hash = "sha256:58d4d81f92e3267c331f160cbbb517fd7644b95ee57a0d6e4b01f53a7e437a4a", size = 1516768, upload-time = "2025-06-20T10:21:33.747Z" },
     { url = "https://files.pythonhosted.org/packages/8c/41/4bf523af7e1b7f367499f8b8709e0e807e9a14c7d1674b0442d7f84403c8/dependency_injector-4.48.1-cp38-abi3-win_amd64.whl", hash = "sha256:572b22b7db9b103718ea52634b5ca1ef763278338310254334f4633a57c9f0e7", size = 1639850, upload-time = "2025-06-20T10:21:35.639Z" },
+]
+
+[[package]]
+name = "elevenlabs"
+version = "2.12.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "pydantic-core" },
+    { name = "requests" },
+    { name = "typing-extensions" },
+    { name = "websockets" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/90/e7/42c6e2c5e9189a6bcd89595980c562e7cbe01c5f2b7bb54a04e973d6c9d7/elevenlabs-2.12.1.tar.gz", hash = "sha256:71d3febd7424c7a27cfc21e4c2cd9fe91d096ae843a40d95c5a8e344d8ed7390", size = 301794, upload-time = "2025-08-25T04:30:47.791Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6f/af/c69b2640eecb790b7320ae9eca9f229cf964e949dae4d76299f335ed083b/elevenlabs-2.12.1-py3-none-any.whl", hash = "sha256:9aa0a6a1d387984b3b5e415e44ae947929c4c14fe106e5c3ccafb34e415430d2", size = 858510, upload-time = "2025-08-25T04:30:46.268Z" },
 ]
 
 [[package]]

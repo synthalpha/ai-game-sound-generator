@@ -19,6 +19,7 @@ dependencies = [
     "streamlit>=1.48.0",
     "streamlit-extras>=0.4.0",
     "cryptography>=45.0.6",
+    "elevenlabs>=2.12.1",
 ]
 
 [project.optional-dependencies]
