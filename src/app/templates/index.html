@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- ヘッダー -->
+    <header class="text-center mb-12">
+        <h1 class="text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent neon-text">
+            AI Game Sound Generator
+        </h1>
+        <p class="text-xl text-gray-300">Tokyo Game Show 2025 Demo</p>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-data="musicGenerator()" x-init="init()">
+        
+        <!-- 左側: タグ選択パネル -->
+        <div class="lg:col-span-1">
+            <div class="glass rounded-2xl p-6 shadow-2xl">
+                <h2 class="text-2xl font-bold mb-6 text-purple-300">🎵 音楽生成設定</h2>
+                
+                <!-- ローディング表示 -->
+                <div x-show="isLoading" class="text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+                    <p class="mt-2 text-gray-400">タグデータを読み込み中...</p>
+                </div>
+                
+                <!-- タグ選択エリア -->
+                <div x-show="!isLoading">
+                <!-- ジャンル -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200">ジャンル</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <template x-for="genre in genres">
+                            <button 
+                                @click="toggleTag('genre', genre.name)"
+                                :class="selectedTags.genre.includes(genre.name) ? 'bg-purple-600 border-purple-400' : 'bg-gray-800 border-gray-600 hover:border-purple-400'"
+                                class="px-3 py-2 rounded-lg border transition-all duration-200 text-sm"
+                                x-text="genre.name_ja || genre.name">
+                            </button>
+                        </template>
+                    </div>
+                </div>
+                
+                <!-- ムード -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200">ムード</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <template x-for="mood in moods">
+                            <button 
+                                @click="toggleTag('mood', mood.name)"
+                                :class="selectedTags.mood.includes(mood.name) ? 'bg-pink-600 border-pink-400' : 'bg-gray-800 border-gray-600 hover:border-pink-400'"
+                                class="px-3 py-2 rounded-lg border transition-all duration-200 text-sm"
+                                x-text="mood.name_ja || mood.name">
+                            </button>
+                        </template>
+                    </div>
+                </div>
+                
+                <!-- シーン -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200">シーン</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <template x-for="scene in scenes">
+                            <button 
+                                @click="toggleTag('scene', scene.name)"
+                                :class="selectedTags.scene.includes(scene.name) ? 'bg-blue-600 border-blue-400' : 'bg-gray-800 border-gray-600 hover:border-blue-400'"
+                                class="px-3 py-2 rounded-lg border transition-all duration-200 text-sm"
+                                x-text="scene.name_ja || scene.name">
+                            </button>
+                        </template>
+                    </div>
+                </div>
+                
+                <!-- 楽器 -->
+                <div class="mb-6" x-show="instruments.length > 0">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200">楽器</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <template x-for="instrument in instruments">
+                            <button 
+                                @click="toggleTag('instrument', instrument.name)"
+                                :class="selectedTags.instrument && selectedTags.instrument.includes(instrument.name) ? 'bg-green-600 border-green-400' : 'bg-gray-800 border-gray-600 hover:border-green-400'"
+                                class="px-3 py-2 rounded-lg border transition-all duration-200 text-sm"
+                                x-text="instrument.name_ja || instrument.name">
+                            </button>
+                        </template>
+                    </div>
+                </div>
+                
+                <!-- テンポ -->
+                <div class="mb-6" x-show="tempos.length > 0">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200">テンポ</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <template x-for="tempo in tempos">
+                            <button 
+                                @click="toggleTag('tempo', tempo.name)"
+                                :class="selectedTags.tempo && selectedTags.tempo.includes(tempo.name) ? 'bg-yellow-600 border-yellow-400' : 'bg-gray-800 border-gray-600 hover:border-yellow-400'"
+                                class="px-3 py-2 rounded-lg border transition-all duration-200 text-sm"
+                                x-text="tempo.name_ja || tempo.name">
+                            </button>
+                        </template>
+                    </div>
+                </div>
+                
+                <!-- 音楽の長さ -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200">⚙️ 詳細設定</h3>
+                    <label class="block text-sm text-gray-300 mb-2">音楽の長さ: <span x-text="duration"></span>秒</label>
+                    <input 
+                        type="range" 
+                        x-model="duration"
+                        min="5" 
+                        max="30" 
+                        step="5"
+                        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider">
+                </div>
+                
+                <!-- 生成ボタン -->
+                <button 
+                    @click="generateMusic()"
+                    :disabled="!canGenerate()"
+                    :class="canGenerate() ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' : 'bg-gray-700 cursor-not-allowed'"
+                    class="w-full py-3 px-4 rounded-xl font-bold transition-all duration-200 transform hover:scale-105">
+                    <span x-show="!isGenerating">🎼 音楽を生成</span>
+                    <span x-show="isGenerating" class="flex items-center justify-center">
+                        <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        生成中...
+                    </span>
+                </button>
+                </div><!-- タグ選択エリア終了 -->
+            </div>
+        </div>
+        
+        <!-- 右側: 生成結果パネル -->
+        <div class="lg:col-span-2">
+            <div class="glass rounded-2xl p-6 shadow-2xl min-h-[600px]">
+                <h2 class="text-2xl font-bold mb-6 text-purple-300">🎧 生成結果</h2>
+                
+                <!-- 結果表示エリア -->
+                <div x-show="!generatedMusic && !isGenerating" class="flex items-center justify-center h-96">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🎵</div>
+                        <p class="text-gray-400">左側でタグを選択して、音楽を生成してください</p>
+                    </div>
+                </div>
+                
+                <!-- 生成中アニメーション -->
+                <div x-show="isGenerating" class="flex flex-col items-center justify-center h-96">
+                    <div class="relative">
+                        <div class="w-32 h-32 border-t-4 border-purple-500 border-solid rounded-full animate-spin"></div>
+                        <div class="absolute top-0 left-0 w-32 h-32 border-r-4 border-pink-500 border-solid rounded-full animate-spin" style="animation-delay: 0.2s; animation-direction: reverse;"></div>
+                    </div>
+                    <p class="mt-8 text-lg" x-text="generatingMessage"></p>
+                    <div class="w-64 bg-gray-700 rounded-full h-2 mt-4">
+                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500" :style="`width: ${progress}%`"></div>
+                    </div>
+                </div>
+                
+                <!-- 生成完了時の表示 -->
+                <div x-show="generatedMusic && !isGenerating">
+                    <!-- プロンプト表示 -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-200">生成プロンプト</h3>
+                        <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400" x-text="generatedPrompt"></div>
+                    </div>
+                    
+                    <!-- 音楽プレイヤー -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-200">生成された音楽</h3>
+                        <div class="bg-gradient-to-r from-purple-900 to-pink-900 rounded-xl p-6">
+                            <audio controls class="w-full" x-show="audioUrl" :src="audioUrl"></audio>
+                            <div x-show="!audioUrl" class="text-center py-4">
+                                <p class="text-yellow-400">⚠️ 音声データはデモモードのため生成されていません</p>
+                                <p class="text-sm text-gray-400 mt-2">ElevenLabs APIキーを設定すると実際の音楽が生成されます</p>
+                            </div>
+                            <!-- ビジュアライザー（装飾） -->
+                            <div class="flex items-center justify-center space-x-1 mt-4">
+                                <template x-for="i in 20">
+                                    <div class="w-1 bg-gradient-to-t from-purple-400 to-pink-400 rounded-full animate-pulse" 
+                                         :style="`height: ${Math.random() * 40 + 10}px; animation-delay: ${Math.random() * 2}s`"></div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- アクションボタン -->
+                    <div class="flex space-x-4">
+                        <a :href="downloadUrl" :download="`generated_music_${duration}s.mp3`" 
+                           class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 px-4 rounded-lg transition-colors text-center">
+                            💾 ダウンロード
+                        </a>
+                        <button @click="shareMusic()" class="flex-1 bg-pink-600 hover:bg-pink-700 py-2 px-4 rounded-lg transition-colors">
+                            🔗 共有
+                        </button>
+                        <button @click="resetGenerator()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 px-4 rounded-lg transition-colors">
+                            🔄 新規生成
+                        </button>
+                    </div>
+                    
+                    <!-- 生成情報 -->
+                    <div class="mt-6 p-4 bg-gray-800 rounded-lg">
+                        <h4 class="font-semibold mb-2">生成情報</h4>
+                        <div class="text-sm text-gray-400 space-y-1">
+                            <p>• 生成時間: <span x-text="generationTime"></span>秒</p>
+                            <p>• ファイルサイズ: <span x-text="fileSize"></span></p>
+                            <p>• 長さ: <span x-text="duration"></span>秒</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function musicGenerator() {
+    return {
+        // 初期化フラグ
+        isLoading: true,
+        
+        // タグデータ（初期化時にAPIから取得）
+        tagData: {},
+        genres: [],
+        moods: [],
+        scenes: [],
+        instruments: [],
+        tempos: [],
+        eras: [],
+        regions: [],
+        
+        // 選択状態
+        selectedTags: {
+            genre: [],
+            mood: [],
+            scene: [],
+            instrument: [],
+            tempo: [],
+            era: [],
+            region: []
+        },
+        
+        // 生成設定
+        duration: 10,
+        
+        // 状態管理
+        isGenerating: false,
+        generatedMusic: false,
+        progress: 0,
+        generatingMessage: 'プロンプトを生成中...',
+        
+        // 結果データ
+        generatedPrompt: '',
+        audioUrl: '',
+        downloadUrl: '',
+        generationTime: 0,
+        fileSize: '0 MB',
+        
+        // メソッド
+        toggleTag(category, tag) {
+            if (!this.selectedTags[category]) {
+                this.selectedTags[category] = [];
+            }
+            const index = this.selectedTags[category].indexOf(tag);
+            if (index > -1) {
+                this.selectedTags[category].splice(index, 1);
+            } else {
+                // カテゴリごとの最大選択数を制限
+                const maxSelections = { 
+                    genre: 1,       // ジャンルは排他的（1つのみ）
+                    mood: 1,        // ムードも排他的
+                    scene: 2,       // シーンは2つまで
+                    instrument: 5,  // 楽器は5つまで
+                    tempo: 1,       // テンポは排他的
+                    era: 1,         // 時代は排他的
+                    region: 1       // 地域は排他的
+                };
+                const maxCount = maxSelections[category] || 3;
+                if (this.selectedTags[category].length < maxCount) {
+                    this.selectedTags[category].push(tag);
+                }
+            }
+        },
+        
+        canGenerate() {
+            return Object.values(this.selectedTags).some(tags => tags.length > 0);
+        },
+        
+        async generateMusic() {
+            this.isGenerating = true;
+            this.progress = 0;
+            
+            // プログレスシミュレーション
+            const progressInterval = setInterval(() => {
+                if (this.progress < 90) {
+                    this.progress += Math.random() * 15;
+                    
+                    if (this.progress > 30) {
+                        this.generatingMessage = '音楽を生成中...';
+                    }
+                    if (this.progress > 60) {
+                        this.generatingMessage = 'マスタリング中...';
+                    }
+                }
+            }, 500);
+            
+            try {
+                // APIリクエストデータ準備
+                const requestData = {
+                    genre_tags: this.selectedTags.genre || [],
+                    mood_tags: this.selectedTags.mood || [],
+                    scene_tags: this.selectedTags.scene || [],
+                    instrument_tags: this.selectedTags.instrument || [],
+                    tempo_tags: this.selectedTags.tempo || [],
+                    era_tags: this.selectedTags.era || [],
+                    region_tags: this.selectedTags.region || [],
+                    duration_seconds: this.duration
+                };
+                
+                // API呼び出し
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                clearInterval(progressInterval);
+                this.progress = 100;
+                this.isGenerating = false;
+                
+                if (data.success) {
+                    this.generatedMusic = true;
+                    this.generatedPrompt = data.prompt;
+                    
+                    // Base64音声データがある場合はオーディオURLを作成
+                    if (data.audio_data) {
+                        console.log('Audio data length:', data.audio_data.length);
+                        
+                        // データURLとして直接設定する方法も試す
+                        this.audioUrl = 'data:audio/mpeg;base64,' + data.audio_data;
+                        console.log('Audio URL created as data URL');
+                        
+                        // Blobも作成（ダウンロード用）
+                        const audioBlob = this.base64ToBlob(data.audio_data, 'audio/mpeg');
+                        console.log('Blob size:', audioBlob.size);
+                        this.downloadUrl = URL.createObjectURL(audioBlob);
+                    } else {
+                        console.log('No audio data in response');
+                    }
+                    
+                    this.generationTime = data.generation_time ? data.generation_time.toFixed(1) : '0';
+                    this.fileSize = data.file_size_bytes ? 
+                        `${(data.file_size_bytes / 1024 / 1024).toFixed(1)} MB` : '0 MB';
+                } else {
+                    alert(`生成エラー: ${data.error_message || '不明なエラー'}`);
+                }
+            } catch (error) {
+                clearInterval(progressInterval);
+                this.isGenerating = false;
+                console.error('生成エラー:', error);
+                alert('音楽生成中にエラーが発生しました');
+            }
+        },
+        
+        base64ToBlob(base64, mimeType) {
+            const byteCharacters = atob(base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            return new Blob([byteArray], { type: mimeType });
+        },
+        
+        shareMusic() {
+            alert('共有機能は準備中です');
+        },
+        
+        resetGenerator() {
+            this.generatedMusic = false;
+            this.selectedTags = { 
+                genre: [], 
+                mood: [], 
+                scene: [], 
+                instrument: [],
+                tempo: [],
+                era: [],
+                region: []
+            };
+            this.generatedPrompt = '';
+            if (this.audioUrl && this.audioUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(this.audioUrl);
+            }
+            if (this.downloadUrl && this.downloadUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(this.downloadUrl);
+            }
+            this.audioUrl = '';
+            this.downloadUrl = '';
+        },
+        
+        // 初期化処理
+        async init() {
+            try {
+                const response = await fetch('/api/tags');
+                const data = await response.json();
+                console.log('Received tag data:', data);
+                this.tagData = data;
+                
+                // カテゴリごとにタグを整理（オブジェクト全体を保持）
+                if (data.genre && data.genre.tags) {
+                    this.genres = data.genre.tags;
+                    console.log('Genres:', this.genres);
+                }
+                if (data.mood && data.mood.tags) {
+                    this.moods = data.mood.tags;
+                    console.log('Moods:', this.moods);
+                }
+                if (data.scene && data.scene.tags) {
+                    this.scenes = data.scene.tags;
+                    console.log('Scenes:', this.scenes);
+                }
+                if (data.instrument && data.instrument.tags) {
+                    this.instruments = data.instrument.tags;
+                }
+                if (data.tempo && data.tempo.tags) {
+                    this.tempos = data.tempo.tags;
+                }
+                if (data.era && data.era.tags) {
+                    this.eras = data.era.tags;
+                }
+                if (data.region && data.region.tags) {
+                    this.regions = data.region.tags;
+                }
+                
+                this.isLoading = false;
+            } catch (error) {
+                console.error('タグデータの取得に失敗:', error);
+                // フォールバックデータ
+                this.genres = ['RPG', 'アクション', 'パズル', 'ホラー', 'アドベンチャー'];
+                this.moods = ['エピック', 'ミステリアス', 'エネルギッシュ', 'リラックス', 'ダーク'];
+                this.scenes = ['戦闘', 'タイトル', 'ボス戦', '探索', 'エンディング'];
+                this.isLoading = false;
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

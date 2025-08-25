@@ -163,17 +163,25 @@ pr-list: ## プルリクエストを一覧表示
 	gh pr list --repo synthalpha/ai-game-sound-generator
 
 # 開発ワークフロー
-dev: ## 開発環境を起動（Streamlit UI）
-	@echo "🚀 Streamlit UIを起動します..."
+dev: ## 開発環境を起動（FastAPI Web）
+	@echo "🚀 FastAPI Webアプリケーションを起動します..."
 	@if command -v uv >/dev/null 2>&1; then \
-		uv run streamlit run src/app/main.py --server.port 8501; \
+		uv run uvicorn src.app.web_app:app --reload --host 0.0.0.0 --port 8000; \
 	else \
-		DOCKER_ENV=development $(DC) up streamlit; \
+		DOCKER_ENV=development $(DC) up web; \
 	fi
 
 api: ## API開発環境を起動（FastAPI）
 	@echo "🚀 FastAPI開発サーバーを起動します..."
 	$(DC) up api
+
+web: ## FastAPI Webアプリケーションを起動
+	@echo "🚀 FastAPI Webアプリケーションを起動します..."
+	@if command -v uv >/dev/null 2>&1; then \
+		uv run uvicorn src.app.web_app:app --reload --host 0.0.0.0 --port 8000; \
+	else \
+		uvicorn src.app.web_app:app --reload --host 0.0.0.0 --port 8000; \
+	fi
 
 ci: ## CI環境で実行するコマンド（lint, format check, test）
 	$(MAKE) check

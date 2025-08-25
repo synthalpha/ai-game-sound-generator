@@ -14,6 +14,7 @@ from typing import Any
 
 from elevenlabs import ElevenLabs as ElevenLabsClient
 from elevenlabs.core import ApiError
+from pydub import AudioSegment
 
 from src.di_container.config import ElevenLabsConfig
 from src.entities.exceptions import (
@@ -172,11 +173,20 @@ class ElevenLabs(AudioGeneratorGateway):
                 audio_data = mp3_data
                 file_format = "mp3"
 
+            # 実際の音声の長さを計算（pydubを使用）
+            try:
+                audio_segment = AudioSegment.from_mp3(BytesIO(mp3_data))
+                actual_duration_seconds = len(audio_segment) // 1000  # ミリ秒から秒に変換
+                self._logger.info(f"Actual audio duration: {actual_duration_seconds} seconds")
+            except Exception as e:
+                self._logger.warning(f"Failed to calculate audio duration: {e}")
+                actual_duration_seconds = request.duration_seconds
+
             # MusicFileエンティティを作成
             music_file = MusicFile(
-                file_name=f"generated_music_{request.duration_seconds}s.{file_format}",
+                file_name=f"generated_music_{actual_duration_seconds}s.{file_format}",
                 file_size_bytes=len(audio_data),
-                duration_seconds=request.duration_seconds,
+                duration_seconds=actual_duration_seconds,
                 format=file_format,
                 data=audio_data,
             )

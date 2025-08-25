@@ -23,32 +23,30 @@ services:
       - ai-sound-network
     restart: ${DOCKER_RESTART_POLICY:-unless-stopped}
 
-  # Streamlit サービス
-  streamlit:
+  # FastAPI Web サービス
+  web:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         BUILD_ENV: ${DOCKER_ENV:-production}
-    container_name: ai-sound-streamlit
+    container_name: ai-sound-web
     ports:
-      - "${STREAMLIT_PORT:-8501}:8501"
+      - "${WEB_PORT:-8001}:8001"
     volumes:
       - ./src:/app/src:cached
       - ./.env:/app/.env:ro
       - ./output:/app/output
-      - ./.streamlit:/app/.streamlit:ro
     environment:
       - PYTHONPATH=/app
-      - SERVICE_TYPE=streamlit
+      - SERVICE_TYPE=web
       - DOCKER_ENV=${DOCKER_ENV:-production}
     env_file:
       - .env
     networks:
       - ai-sound-network
-    depends_on:
-      - api
     restart: ${DOCKER_RESTART_POLICY:-unless-stopped}
+    command: uvicorn src.app.web_app:app --host 0.0.0.0 --port 8001 --reload
 
   # PostgreSQL データベース（将来用）
   # db:
