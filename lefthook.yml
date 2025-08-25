@@ -6,9 +6,11 @@ pre-commit:
   commands:
     ruff-check:
       glob: "*.py"
-      # Dev Containers 内では直接実行、外部では Docker 経由
+      # ローカル環境でuv、なければDocker経由
       run: |
-        if [ -f /.dockerenv ] || [ -n "$DEVCONTAINER" ]; then
+        if command -v uv >/dev/null 2>&1; then
+          uv run ruff check {staged_files}
+        elif [ -f /.dockerenv ] || [ -n "$DEVCONTAINER" ]; then
           uv run ruff check {staged_files}
         else
           docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && uv run ruff check {staged_files}"
@@ -18,7 +20,9 @@ pre-commit:
     ruff-format:
       glob: "*.py"
       run: |
-        if [ -f /.dockerenv ] || [ -n "$DEVCONTAINER" ]; then
+        if command -v uv >/dev/null 2>&1; then
+          uv run ruff format {staged_files}
+        elif [ -f /.dockerenv ] || [ -n "$DEVCONTAINER" ]; then
           uv run ruff format {staged_files}
         else
           docker compose run --rm -T -v $(pwd):/app api sh -c "cd /app && uv run ruff format {staged_files}"

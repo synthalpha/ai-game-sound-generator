@@ -48,6 +48,7 @@ select = [
 ignore = [
     "E501",  # line too long (handled by formatter)
     "B008",  # do not perform function calls in argument defaults
+    "B024",  # abstract base class without abstract methods (design choice)
 ]
 
 [tool.ruff.lint.isort]
@@ -76,4 +77,10 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
 ]
