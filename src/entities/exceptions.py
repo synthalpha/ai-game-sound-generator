@@ -106,6 +106,30 @@ class QuotaExceededException(DomainException):
         )
 
 
+class AudioGenerationError(DomainException):
+    """音楽生成エラー。"""
+
+    def __init__(self, message: str) -> None:
+        """初期化。"""
+        super().__init__(message)
+
+
+class RateLimitError(DomainException):
+    """レート制限エラー。"""
+
+    def __init__(self, message: str) -> None:
+        """初期化。"""
+        super().__init__(message)
+
+
+class ExternalAPIError(DomainException):
+    """外部APIエラー。"""
+
+    def __init__(self, message: str) -> None:
+        """初期化。"""
+        super().__init__(message)
+
+
 class ExternalServiceException(DomainException):
     """外部サービスに関する例外。"""
 

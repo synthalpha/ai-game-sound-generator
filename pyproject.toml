@@ -63,12 +63,17 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.pytest.ini_options]
+minversion = "6.0"
 testpaths = ["tests"]
+pythonpath = ["."]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-ra -q --strict-markers --cov=src --cov-report=term-missing"
+addopts = "-ra -q --strict-markers --cov=src --cov-report=term-missing --cov-report=html"
 asyncio_mode = "auto"
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+]
 
 [tool.coverage.run]
 branch = true
