@@ -106,8 +106,6 @@ class ElevenLabsMusicGateway:
 
             self._client = ElevenLabsClient(
                 api_key=self._config.api_key,
-                timeout=self._config.timeout,
-                max_retries=self._config.max_retries,
             )
             self._logger.info("ElevenLabs SDKクライアントを初期化しました")
 
@@ -155,8 +153,14 @@ class ElevenLabsMusicGateway:
             # レート制限の記録
             await self._rate_limiter.record_request()
 
-            # BytesIOから音声データを取得
-            if isinstance(track, BytesIO):
+            # ジェネレータから音声データを取得
+            if hasattr(track, "__iter__"):
+                # ジェネレータの場合はチャンクを結合
+                chunks = []
+                for chunk in track:
+                    chunks.append(chunk)
+                mp3_data = b"".join(chunks)
+            elif isinstance(track, BytesIO):
                 track.seek(0)
                 mp3_data = track.read()
             else:
@@ -229,8 +233,14 @@ class ElevenLabsMusicGateway:
                 ),
             )
 
-            # BytesIOから音声データを取得
-            if isinstance(track, BytesIO):
+            # ジェネレータから音声データを取得
+            if hasattr(track, "__iter__"):
+                # ジェネレータの場合はチャンクを結合
+                chunks = []
+                for chunk in track:
+                    chunks.append(chunk)
+                mp3_data = b"".join(chunks)
+            elif isinstance(track, BytesIO):
                 track.seek(0)
                 mp3_data = track.read()
             else:

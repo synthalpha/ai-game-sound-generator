@@ -19,6 +19,7 @@ ARG BUILD_ENV=development
 RUN apt-get update && apt-get install -y \
     git \
     make \
+    ffmpeg \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 開発環境の場合のみデバッグツールを追加インストール

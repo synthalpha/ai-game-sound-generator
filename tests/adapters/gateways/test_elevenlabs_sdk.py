@@ -76,8 +76,6 @@ class TestElevenLabsMusicGateway:
             assert client1 == mock_client
             mock_client_class.assert_called_once_with(
                 api_key="test_api_key_1234567890abcdef",
-                timeout=30.0,
-                max_retries=3,
             )
 
             # 2回目は同じインスタンスを返す
