@@ -5,18 +5,19 @@
 """
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING
 
-from src.adapters.repositories.base import InMemoryRepository
 from src.di_container.config import Environment
 from src.di_container.container import get_container
-from src.entities.audio import Audio
-from src.entities.tag import Tag, TagPreset
 from src.usecases.common.interfaces import (
     AudioGeneratorGateway,
-    AudioRepository,
-    TagRepository,
+    MusicFileRepository,
 )
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from src.entities.music_generation import MusicFile
 
 
 class ServiceProvider:
@@ -49,16 +50,10 @@ class RepositoryProvider(ServiceProvider):
 
     def _register_in_memory_repositories(self) -> None:
         """インメモリリポジトリを登録。"""
-        # AudioRepository
+        # MusicFileRepository
         self._container.register_singleton(
-            AudioRepository,
-            lambda: InMemoryAudioRepository(),
-        )
-
-        # TagRepository
-        self._container.register_singleton(
-            TagRepository,
-            lambda: InMemoryTagRepository(),
+            MusicFileRepository,
+            lambda: InMemoryMusicFileRepository(),
         )
 
         self._logger.info("In-memory repositories registered")
@@ -77,17 +72,14 @@ class GatewayProvider(ServiceProvider):
             )
             self._logger.info("ElevenLabs gateway registered")
         else:
-            # モックゲートウェイ
-            self._container.register_singleton(
-                AudioGeneratorGateway,
-                lambda: MockAudioGeneratorGateway(),
-            )
-            self._logger.warning("Using mock audio generator gateway (no API key)")
+            self._logger.error("ElevenLabs API key is required but not provided")
+            raise ValueError("ElevenLabs API key is required")
 
     def _create_elevenlabs_gateway(self) -> AudioGeneratorGateway:
         """ElevenLabsゲートウェイを作成。"""
-        # TODO: 実際のElevenLabsGateway実装
-        return MockAudioGeneratorGateway()
+        from src.adapters.gateways.elevenlabs import ElevenLabs
+
+        return ElevenLabs(self._container.config.elevenlabs)
 
 
 class UseCaseProvider(ServiceProvider):
@@ -95,8 +87,12 @@ class UseCaseProvider(ServiceProvider):
 
     def register(self) -> None:
         """ユースケースを登録。"""
-        # TODO: ユースケース実装後に登録
-        pass
+        from src.usecases.music_generation.generate_music import GenerateMusicUseCase
+
+        self._container.register_factory(
+            GenerateMusicUseCase,
+            lambda: GenerateMusicUseCase(music_gateway=self._container.get(AudioGeneratorGateway)),
+        )
 
 
 class ControllerProvider(ServiceProvider):
@@ -104,48 +100,38 @@ class ControllerProvider(ServiceProvider):
 
     def register(self) -> None:
         """コントローラーを登録。"""
-        # TODO: コントローラー実装後に登録
-        pass
+        from src.controllers.streamlit.generator_controller import StreamlitGeneratorController
+
+        self._container.register_factory(
+            StreamlitGeneratorController,
+            lambda: StreamlitGeneratorController(),
+        )
 
 
 # 一時的な実装クラス（後で適切な場所に移動）
 
 
-class InMemoryAudioRepository(InMemoryRepository[Audio]):
-    """インメモリ音声リポジトリ。"""
+class InMemoryMusicFileRepository:
+    """インメモリ音楽ファイルリポジトリ。"""
 
-    pass
+    def __init__(self) -> None:
+        """初期化。"""
+        from uuid import UUID
 
+        from src.entities.music_generation import MusicFile
 
-class InMemoryTagRepository(InMemoryRepository[Tag]):
-    """インメモリタグリポジトリ。"""
+        self._MusicFile = MusicFile
+        self._UUID = UUID
+        self._storage: dict[str, MusicFile] = {}
 
-    async def find_presets(self) -> list[TagPreset]:
-        """プリセット一覧を取得。"""
-        # TODO: 実装
-        return []
+    async def save(self, music_file: "MusicFile") -> "MusicFile":
+        """音楽ファイルを保存。"""
+        self._storage[str(music_file.file_id)] = music_file
+        return music_file
 
-    async def save_preset(self, preset: TagPreset) -> None:
-        """プリセットを保存。"""
-        # TODO: 実装
-        pass
-
-
-class MockAudioGeneratorGateway:
-    """モック音声生成ゲートウェイ。"""
-
-    async def generate(
-        self,
-        _prompt: str,
-        duration_seconds: int,
-        **_kwargs: Any,
-    ) -> dict:
-        """音声を生成（モック）。"""
-        return {
-            "audio_id": "mock_id",
-            "file_path": "/tmp/mock_audio.mp3",
-            "duration_seconds": duration_seconds,
-        }
+    async def find_by_id(self, file_id: "UUID") -> "MusicFile | None":
+        """IDで音楽ファイルを取得。"""
+        return self._storage.get(str(file_id))
 
 
 def register_all_providers() -> None:

@@ -25,6 +25,7 @@ from src.entities.music_generation import (
     MusicFile,
     MusicGenerationRequest,
 )
+from src.usecases.common.interfaces import AudioGeneratorGateway
 from src.utils.audio_converter import AudioConverter
 from src.utils.decorators import async_timer
 from src.utils.rate_limiter import (
@@ -54,7 +55,7 @@ class CompositionPlan:
         }
 
 
-class ElevenLabsMusicGateway:
+class ElevenLabs(AudioGeneratorGateway):
     """ElevenLabs Music APIゲートウェイ。
 
     公式SDKを使用してElevenLabs Music APIと通信します。

@@ -39,11 +39,10 @@ class StreamlitGeneratorController:
     - It handles UI-specific concerns like session state
     """
 
-    def __init__(self):
+    def __init__(self, use_case=None):
         """Initialize the controller."""
-        # In a real implementation, inject use case here via DI
-        # self.use_case = GenerateAudioUseCase()
-        pass
+        # TODO: 完全なDI実装時にuse_caseを必須にする
+        self._use_case = use_case
 
     def generate_audio(self, request: GenerationRequest) -> GenerationResponse:
         """Generate audio based on selected tags.
@@ -58,10 +57,11 @@ class StreamlitGeneratorController:
             # Convert tags to prompt
             prompt = self._build_prompt(request)
 
-            # TODO: Call actual use case here
-            # result = self.use_case.execute(prompt)
+            if self._use_case:
+                # TODO: 実際のuse case実装
+                pass
 
-            # For now, return mock response
+            # 暫定的なモック応答（UIテスト用）
             return GenerationResponse(
                 success=True,
                 audio_path="generated_audio/sample.wav",
