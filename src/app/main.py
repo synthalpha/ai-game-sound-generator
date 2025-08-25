@@ -1,121 +1,172 @@
-"""Streamlitアプリケーションのエントリーポイント"""
+"""
+Streamlitアプリケーションのエントリーポイント。
+
+音楽生成UIのメインアプリケーションです。
+"""
+
+import asyncio
+import os
 
 import streamlit as st
+from dotenv import load_dotenv
 
-from src.app.components.tag_selector import render_tag_selector
-from src.app.config.settings import apply_custom_css, configure_page
-from src.controllers.streamlit.generator_controller import (
-    GenerationRequest,
-    StreamlitGeneratorController,
-)
+from src.adapters.gateways.elevenlabs import ElevenLabs
+from src.adapters.repositories.prompt_repository import PromptRepository
+from src.adapters.repositories.tag_repository import TagRepository
+from src.di_container.config import ElevenLabsConfig
+from src.entities.music_generation import MusicGenerationRequest
+from src.entities.prompt import PromptType
+from src.usecases.prompt_generation.generate_prompt import GeneratePromptUseCase
 
-# ページ設定
-configure_page()
-apply_custom_css()
+# 環境変数を読み込み
+load_dotenv()
 
 
-def main():
-    """メインアプリケーション関数"""
-    # ヘッダー
+def configure_page() -> None:
+    """ページ設定を構成。"""
+    st.set_page_config(
+        page_title="AI Game Sound Generator",
+        page_icon="🎮",
+        layout="wide",
+    )
+
+
+def main() -> None:
+    """メインアプリケーション。"""
+    configure_page()
+
+    # タイトル
     st.title("🎮 AI Game Sound Generator")
     st.markdown("### Tokyo Game Show 2025 Demo")
     st.divider()
 
-    # コントローラー初期化
-    controller = StreamlitGeneratorController()
+    # リポジトリ初期化
+    tag_repo = TagRepository()
+    prompt_repo = PromptRepository()
+    prompt_generator = GeneratePromptUseCase(tag_repo, prompt_repo)
 
-    # レイアウト用のカラム作成
-    col1, col2 = st.columns([1, 2])
+    # 2カラムレイアウト
+    col1, col2 = st.columns([2, 3])
 
     with col1:
         st.markdown("### 🎵 音楽生成設定")
 
-        # タグ選択コンポーネント
-        tags = render_tag_selector()
+        # タグ選択
+        selected_tags = []
+        categories = tag_repo.get_all_categories()
+
+        for category in categories:
+            st.markdown(f"**{category.display_name}**")
+            tags = tag_repo.get_tags_by_category(category.id)
+
+            if tags:
+                tag_names = [tag.value.name_ja or tag.value.name for tag in tags]
+                tag_ids = [f"{category.id}_{tag.value.name.lower()}" for tag in tags]
+
+                if category.isExclusive:
+                    # ラジオボタン（排他的選択）
+                    selected = st.radio(
+                        f"{category.display_name}を選択",
+                        options=tag_ids,
+                        format_func=lambda x, names=tag_names, ids=tag_ids: names[ids.index(x)],
+                        key=f"radio_{category.id}",
+                        label_visibility="collapsed",
+                    )
+                    if selected:
+                        selected_tags.append(selected)
+                else:
+                    # マルチセレクト（複数選択）
+                    selected = st.multiselect(
+                        f"{category.display_name}を選択",
+                        options=tag_ids,
+                        format_func=lambda x, names=tag_names, ids=tag_ids: names[ids.index(x)],
+                        key=f"multi_{category.id}",
+                        max_selections=category.maxSelections,
+                        label_visibility="collapsed",
+                    )
+                    selected_tags.extend(selected)
+
+        # 生成設定
+        st.markdown("#### ⚙️ 詳細設定")
+        duration = st.slider(
+            "音楽の長さ（秒）",
+            min_value=5,
+            max_value=30,
+            value=10,
+            step=5,
+        )
 
         # 生成ボタン
         generate_button = st.button(
             "🎼 音楽を生成",
             type="primary",
             use_container_width=True,
+            disabled=len(selected_tags) == 0,
         )
 
     with col2:
         st.markdown("### 🎧 生成結果")
 
-        # 結果コンテナ
-        result_container = st.container()
-
-        with result_container:
-            if generate_button and any([tags["mood"], tags["genre"], tags["instrument"]]):
-                # 生成リクエスト作成
-                request = GenerationRequest(
-                    mood_tags=tags["mood"],
-                    genre_tags=tags["genre"],
-                    instrument_tags=tags["instrument"],
-                    tempo=tags.get("tempo"),
+        if generate_button and selected_tags:
+            # プロンプト生成
+            with st.spinner("プロンプトを生成中..."):
+                prompt = prompt_generator.execute(
+                    selected_tags,
+                    prompt_type=PromptType.MUSIC,
+                    duration_seconds=duration,
                 )
 
-                # 進捗表示
-                with st.spinner("音楽を生成中... (約30秒)"):
-                    progress_bar = st.progress(0)
+            # プロンプト表示
+            st.markdown("#### 生成プロンプト")
+            st.code(prompt.text, language="text")
 
-                    # 音楽生成
-                    response = controller.generate_audio(request)
+            # 音楽生成
+            with st.spinner(f"音楽を生成中...（約{duration}秒）"):
+                try:
+                    # ElevenLabs API呼び出し
+                    api_key = os.getenv("ELEVENLABS_API_KEY")
+                    if not api_key:
+                        st.error("APIキーが設定されていません。")
+                        st.stop()
 
-                    # 進捗更新
-                    for i in range(100):
-                        progress_bar.progress(i + 1)
+                    config = ElevenLabsConfig(api_key=api_key)
+                    elevenlabs = ElevenLabs(config)
 
-                # 結果表示
-                if response.success:
-                    st.success("✅ 生成完了！")
+                    request = MusicGenerationRequest(
+                        prompt=prompt.text,
+                        duration_seconds=duration,
+                    )
 
-                    # プロンプト表示
-                    st.markdown("#### 使用プロンプト")
-                    st.code(response.prompt, language="text")
+                    # 非同期実行
+                    async def generate():
+                        return await elevenlabs.compose_music(request, output_format="mp3")
 
-                    # 音声プレイヤー（プレースホルダー）
-                    st.markdown("#### 生成された音楽")
-                    st.info("🎵 音声プレイヤーがここに表示されます")
+                    music_file = asyncio.run(generate())
+
+                    st.success("✅ 音楽生成が完了しました！")
+
+                    # 音楽プレイヤー
+                    st.audio(music_file.data, format="audio/mp3")
 
                     # ダウンロードボタン
-                    col_dl1, col_dl2 = st.columns(2)
-                    with col_dl1:
-                        st.button(
-                            "💾 ダウンロード",
-                            use_container_width=True,
-                        )
-                    with col_dl2:
-                        if st.button(
-                            "📚 履歴に保存",
-                            use_container_width=True,
-                        ):
-                            controller.save_to_history(response)
-                            st.toast("履歴に保存しました", icon="✅")
+                    st.download_button(
+                        "💾 ダウンロード",
+                        data=music_file.data,
+                        file_name=music_file.file_name,
+                        mime="audio/mp3",
+                    )
 
                     # 生成情報
-                    st.markdown("#### 生成情報")
-                    st.markdown(f"- 生成時間: {response.generation_time:.1f}秒")
-                    st.markdown(f"- ファイル: {response.audio_path}")
+                    st.info(f"""
+                    - ファイル名: {music_file.file_name}
+                    - サイズ: {music_file.file_size_bytes:,} bytes
+                    - 長さ: {music_file.duration_seconds}秒
+                    """)
 
-                else:
-                    st.error(f"❌ 生成失敗: {response.error_message}")
-
-            elif generate_button:
-                st.warning("⚠️ タグを選択してください")
-            else:
-                st.info("👈 左側でタグを選択して、音楽を生成してください")
-
-    # 履歴セクション
-    with st.expander("📜 生成履歴", expanded=False):
-        history = controller.get_history()
-        if history:
-            for i, item in enumerate(reversed(history), 1):
-                st.markdown(f"**#{i}** - {item['prompt']}")
-                st.caption(f"生成時間: {item['generation_time']:.1f}秒")
+                except Exception as e:
+                    st.error(f"音楽生成に失敗しました: {e}")
         else:
-            st.info("履歴がありません")
+            st.info("👈 左側でタグを選択して、音楽を生成してください")
 
 
 if __name__ == "__main__":
