@@ -215,6 +215,19 @@ class MusicGenerationResponse(ValueObject):
 
 
 @dataclass(frozen=True)
+class MusicMetadata(ValueObject):
+    """音楽メタデータ。"""
+
+    music_id: UUID
+    prompt: str
+    tags: list[dict[str, Any]] = field(default_factory=list)
+    duration_seconds: int = 30
+    generated_at: datetime | None = None
+    user_id: str | None = None
+    custom_metadata: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True)
 class MusicFile(ValueObject):
     """音楽ファイルエンティティ。
 

@@ -151,3 +151,11 @@ class ExternalServiceException(DomainException):
                 "retry_after": retry_after,
             },
         )
+
+
+class ValidationError(DomainException):
+    """検証エラー。"""
+
+    def __init__(self, message: str) -> None:
+        """初期化。"""
+        super().__init__(message)
