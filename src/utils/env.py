@@ -53,9 +53,7 @@ def get_api_key(service: str, required: bool = True) -> str | None:
     api_key = os.getenv(key_name)
 
     if required and not api_key:
-        raise ValueError(
-            f"{key_name}が設定されていません。.local/.envまたは環境変数に設定してください。"
-        )
+        raise ValueError(f"{key_name}が設定されていません。")
 
     return api_key
 

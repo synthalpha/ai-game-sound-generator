@@ -100,10 +100,7 @@ class ElevenLabs(AudioGeneratorGateway):
         """クライアントを取得（遅延初期化）。"""
         if self._client is None:
             if not self._config.api_key:
-                raise ValueError(
-                    "ElevenLabs APIキーが設定されていません。"
-                    ".local/.envまたは環境変数にELEVENLABS_API_KEYを設定してください。"
-                )
+                raise ValueError("ElevenLabs APIキーが設定されていません。")
 
             self._client = ElevenLabsClient(
                 api_key=self._config.api_key,

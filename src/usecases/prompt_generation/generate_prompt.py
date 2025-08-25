@@ -136,7 +136,7 @@ class GeneratePromptUseCase:
             components.append(f"{', '.join(genres)} game music")
 
         if "mood" in tags_by_category:
-            moods = [tag.value.name_ja or tag.value.name for tag in tags_by_category["mood"]]
+            moods = [tag.value.name for tag in tags_by_category["mood"]]
             mood_text = ", ".join(moods)
             components.append(f"with {mood_text} atmosphere")
 

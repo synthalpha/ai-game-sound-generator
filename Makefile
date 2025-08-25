@@ -165,7 +165,11 @@ pr-list: ## プルリクエストを一覧表示
 # 開発ワークフロー
 dev: ## 開発環境を起動（Streamlit UI）
 	@echo "🚀 Streamlit UIを起動します..."
-	DOCKER_ENV=development $(DC) up streamlit
+	@if command -v uv >/dev/null 2>&1; then \
+		uv run streamlit run src/app/main.py --server.port 8501; \
+	else \
+		DOCKER_ENV=development $(DC) up streamlit; \
+	fi
 
 api: ## API開発環境を起動（FastAPI）
 	@echo "🚀 FastAPI開発サーバーを起動します..."
