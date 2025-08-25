@@ -100,12 +100,9 @@ class ControllerProvider(ServiceProvider):
 
     def register(self) -> None:
         """コントローラーを登録。"""
-        from src.controllers.streamlit.generator_controller import StreamlitGeneratorController
-
-        self._container.register_factory(
-            StreamlitGeneratorController,
-            lambda: StreamlitGeneratorController(),
-        )
+        # FastAPI コントローラーは API ルーター経由で利用されるため
+        # ここでの登録は不要
+        pass
 
 
 # 一時的な実装クラス（後で適切な場所に移動）
@@ -140,7 +137,7 @@ def register_all_providers() -> None:
         RepositoryProvider(),
         GatewayProvider(),
         UseCaseProvider(),
-        ControllerProvider(),
+        # ControllerProvider() は不要
     ]
 
     for provider in providers:
