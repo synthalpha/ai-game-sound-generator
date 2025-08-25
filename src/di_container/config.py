@@ -164,7 +164,7 @@ class Config:
                 "LOG_FORMAT",
                 "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             ),
-            file_path=Path(os.getenv("LOG_FILE")) if os.getenv("LOG_FILE") else None,
+            file_path=Path(os.getenv("LOG_FILE")) if os.getenv("LOG_FILE") else None,  # type: ignore[arg-type]
         )
 
         # キャッシュ設定
