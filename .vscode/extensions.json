@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    // Ruff (フォーマッター&リンター)
+    "charliermarsh.ruff",
+    
+    // Python基本
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    
+    // その他便利な拡張機能
+    "tamasfe.even-better-toml",
+    "redhat.vscode-yaml"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  // Python設定
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
+  
+  // Ruff設定
+  "ruff.format.args": [],
+  "ruff.lint.args": [],
+  "ruff.importStrategy": "fromEnvironment",
+  
+  // エディタ全般設定
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  
+  // Python環境
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  
+  // ファイル関連付け
+  "files.associations": {
+    "*.md": "markdown",
+    "pyproject.toml": "toml"
+  }
+}

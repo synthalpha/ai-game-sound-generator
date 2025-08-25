@@ -30,31 +30,65 @@ setup: dev-install ## 初期セットアップ（依存関係インストール 
 
 # コード品質
 lint: ## Ruffでコードをチェック
-	$(DC_RUN) api ruff check .
+	@if command -v uv >/dev/null 2>&1; then \
+		uv run ruff check .; \
+	else \
+		$(DC_RUN) api ruff check .; \
+	fi
 
 format: ## Ruffでコードをフォーマット
-	$(DC_RUN) api ruff format .
+	@if command -v uv >/dev/null 2>&1; then \
+		uv run ruff format .; \
+	else \
+		$(DC_RUN) api ruff format .; \
+	fi
 
 check: ## lintとformatをチェックモードで実行
-	$(DC_RUN) api ruff check .
-	$(DC_RUN) api ruff format --check .
+	@if command -v uv >/dev/null 2>&1; then \
+		uv run ruff check .; \
+		uv run ruff format --check .; \
+	else \
+		$(DC_RUN) api ruff check .; \
+		$(DC_RUN) api ruff format --check .; \
+	fi
 
 fix: ## 自動修正可能な問題を修正
-	$(DC_RUN) api ruff check --fix .
-	$(DC_RUN) api ruff format .
+	@if command -v uv >/dev/null 2>&1; then \
+		uv run ruff check --fix .; \
+		uv run ruff format .; \
+	else \
+		$(DC_RUN) api ruff check --fix .; \
+		$(DC_RUN) api ruff format .; \
+	fi
 
 # テスト
 test: ## テストを実行
-	$(DC_RUN) api pytest
+	@if command -v uv >/dev/null 2>&1; then \
+		uv run pytest; \
+	else \
+		$(DC_RUN) api pytest; \
+	fi
 
 test-verbose: ## テストを詳細モードで実行
-	$(DC_RUN) api pytest -v
+	@if command -v uv >/dev/null 2>&1; then \
+		uv run pytest -v; \
+	else \
+		$(DC_RUN) api pytest -v; \
+	fi
 
 test-cov: ## カバレッジ付きでテストを実行
-	$(DC_RUN) api pytest --cov=src --cov-report=term-missing --cov-report=html
+	@if command -v uv >/dev/null 2>&1; then \
+		uv run pytest --cov=src --cov-report=term-missing --cov-report=html; \
+	else \
+		$(DC_RUN) api pytest --cov=src --cov-report=term-missing --cov-report=html; \
+	fi
 
 test-watch: ## ファイル変更を監視してテストを自動実行
-	$(DC_RUN) api pytest-watch
+	@if command -v uv >/dev/null 2>&1; then \
+		uv run pytest-watch; \
+	else \
+		$(DC_RUN) api pytest-watch; \
+	fi
 
 # 開発サーバー
 run: ## 開発サーバーを起動（FastAPI）
