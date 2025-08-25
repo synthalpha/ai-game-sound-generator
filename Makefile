@@ -67,7 +67,7 @@ streamlit: ## Streamlit UIを起動
 	$(DC) up streamlit
 
 streamlit-dev: ## Streamlit UIを開発モードで起動
-	DOCKER_HOT_RELOAD=true $(DC) up streamlit
+	DOCKER_ENV=development $(DC) up streamlit
 
 # Docker関連
 docker-build: ## Dockerイメージをビルド
@@ -131,7 +131,7 @@ pr-list: ## プルリクエストを一覧表示
 # 開発ワークフロー
 dev: ## 開発環境を起動（Streamlit UI）
 	@echo "🚀 Streamlit UIを起動します..."
-	DOCKER_HOT_RELOAD=true $(DC) up streamlit
+	DOCKER_ENV=development $(DC) up streamlit
 
 api: ## API開発環境を起動（FastAPI）
 	@echo "🚀 FastAPI開発サーバーを起動します..."

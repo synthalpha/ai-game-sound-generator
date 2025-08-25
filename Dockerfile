@@ -15,19 +15,23 @@ COPY pyproject.toml uv.lock ./
 # ビルド引数で環境を指定
 ARG BUILD_ENV=development
 
+# 共通パッケージをインストール
 RUN apt-get update && apt-get install -y \
     git \
     make \
-    vim \
-    less \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# lefthookをインストール
-RUN apt-get update && apt-get install -y golang-go && \
-    go install github.com/evilmartians/lefthook@latest && \
-    mv /root/go/bin/lefthook /usr/local/bin/ && \
-    apt-get remove -y golang-go && apt-get autoremove -y && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# 開発環境の場合のみデバッグツールを追加インストール
+RUN if [ "$BUILD_ENV" = "development" ]; then \
+    apt-get update && apt-get install -y \
+    vim \
+    less \
+    procps \
+    net-tools \
+    lsof \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*; \
+    fi
+
 
 RUN if [ "$BUILD_ENV" = "development" ]; then \
     uv sync --frozen --all-extras; \
@@ -53,5 +57,5 @@ EXPOSE 8000 8501
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# デフォルトコマンド
-CMD ["/usr/local/bin/docker-entrypoint.sh"]
+# エントリーポイントを設定
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
