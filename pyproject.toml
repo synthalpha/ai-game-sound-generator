@@ -49,6 +49,7 @@ ignore = [
     "E501",  # line too long (handled by formatter)
     "B008",  # do not perform function calls in argument defaults
     "B024",  # abstract base class without abstract methods (design choice)
+    "UP046", # Generic syntax (we use traditional Generic for clarity)
 ]
 
 [tool.ruff.lint.isort]
@@ -82,5 +83,6 @@ exclude_lines = [
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
     "pytest-cov>=6.2.1",
 ]
