@@ -48,6 +48,11 @@ select = [
 ignore = [
     "E501",  # line too long (handled by formatter)
     "B008",  # do not perform function calls in argument defaults
+    "B024",  # abstract base class without abstract methods (design choice)
+    "UP046", # Generic syntax (we use traditional Generic for clarity)
+    "UP040", # TypeAlias syntax (we use traditional TypeAlias for clarity)
+    "UP047", # Generic function syntax (we use traditional syntax)
+    "UP038", # isinstance with union (we use tuple for clarity)
 ]
 
 [tool.ruff.lint.isort]
@@ -77,3 +82,36 @@ exclude_lines = [
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+    "pytest-cov>=6.2.1",
+    "mypy>=1.11.0",
+    "types-python-dateutil>=2.9.0",
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_unimported = false
+no_implicit_optional = true
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+namespace_packages = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "streamlit.*",
+    "streamlit_extras.*",
+    "dependency_injector.*",
+    "structlog.*",
+]
+ignore_missing_imports = true
