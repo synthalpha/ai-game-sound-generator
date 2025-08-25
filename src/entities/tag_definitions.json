@@ -1,0 +1,639 @@
+{
+  "categories": [
+    {
+      "id": "genre",
+      "name": "genre",
+      "displayName": "ジャンル",
+      "displayNameEn": "Genre",
+      "isRequired": false,
+      "isExclusive": true,
+      "maxSelections": 1,
+      "description": "ゲームのジャンルを指定します"
+    },
+    {
+      "id": "mood",
+      "name": "mood",
+      "displayName": "ムード",
+      "displayNameEn": "Mood",
+      "isRequired": false,
+      "isExclusive": true,
+      "maxSelections": 1,
+      "description": "音楽の雰囲気や感情を指定します"
+    },
+    {
+      "id": "scene",
+      "name": "scene",
+      "displayName": "シーン",
+      "displayNameEn": "Scene",
+      "isRequired": false,
+      "isExclusive": false,
+      "maxSelections": 2,
+      "description": "ゲーム内のシーンや場面を指定します"
+    },
+    {
+      "id": "instrument",
+      "name": "instrument",
+      "displayName": "楽器",
+      "displayNameEn": "Instrument",
+      "isRequired": false,
+      "isExclusive": false,
+      "maxSelections": 5,
+      "description": "使用する楽器を指定します"
+    },
+    {
+      "id": "tempo",
+      "name": "tempo",
+      "displayName": "テンポ",
+      "displayNameEn": "Tempo",
+      "isRequired": false,
+      "isExclusive": true,
+      "maxSelections": 1,
+      "description": "音楽のテンポを指定します"
+    },
+    {
+      "id": "era",
+      "name": "era",
+      "displayName": "時代",
+      "displayNameEn": "Era",
+      "isRequired": false,
+      "isExclusive": true,
+      "maxSelections": 1,
+      "description": "音楽の時代設定を指定します"
+    },
+    {
+      "id": "region",
+      "name": "region",
+      "displayName": "地域",
+      "displayNameEn": "Region",
+      "isRequired": false,
+      "isExclusive": true,
+      "maxSelections": 1,
+      "description": "音楽の地域性を指定します"
+    }
+  ],
+  "tags": [
+    {
+      "id": "genre_rpg",
+      "category": "genre",
+      "value": "RPG",
+      "displayName": "RPG",
+      "displayNameEn": "RPG",
+      "description": "ロールプレイングゲーム向けの音楽",
+      "keywords": ["adventure", "fantasy", "epic"]
+    },
+    {
+      "id": "genre_action",
+      "category": "genre",
+      "value": "action",
+      "displayName": "アクション",
+      "displayNameEn": "Action",
+      "description": "アクションゲーム向けの音楽",
+      "keywords": ["intense", "dynamic", "energetic"]
+    },
+    {
+      "id": "genre_puzzle",
+      "category": "genre",
+      "value": "puzzle",
+      "displayName": "パズル",
+      "displayNameEn": "Puzzle",
+      "description": "パズルゲーム向けの音楽",
+      "keywords": ["thinking", "calm", "contemplative"]
+    },
+    {
+      "id": "genre_shooting",
+      "category": "genre",
+      "value": "shooting",
+      "displayName": "シューティング",
+      "displayNameEn": "Shooting",
+      "description": "シューティングゲーム向けの音楽",
+      "keywords": ["intense", "fast-paced", "electronic"]
+    },
+    {
+      "id": "genre_racing",
+      "category": "genre",
+      "value": "racing",
+      "displayName": "レース",
+      "displayNameEn": "Racing",
+      "description": "レーシングゲーム向けの音楽",
+      "keywords": ["speed", "driving", "energetic"]
+    },
+    {
+      "id": "genre_simulation",
+      "category": "genre",
+      "value": "simulation",
+      "displayName": "シミュレーション",
+      "displayNameEn": "Simulation",
+      "description": "シミュレーションゲーム向けの音楽",
+      "keywords": ["ambient", "strategic", "thoughtful"]
+    },
+    {
+      "id": "genre_adventure",
+      "category": "genre",
+      "value": "adventure",
+      "displayName": "アドベンチャー",
+      "displayNameEn": "Adventure",
+      "description": "アドベンチャーゲーム向けの音楽",
+      "keywords": ["exploration", "discovery", "mysterious"]
+    },
+    {
+      "id": "mood_bright",
+      "category": "mood",
+      "value": "bright",
+      "displayName": "明るい",
+      "displayNameEn": "Bright",
+      "description": "明るく楽しい雰囲気",
+      "keywords": ["happy", "cheerful", "uplifting"]
+    },
+    {
+      "id": "mood_dark",
+      "category": "mood",
+      "value": "dark",
+      "displayName": "暗い",
+      "displayNameEn": "Dark",
+      "description": "暗く重い雰囲気",
+      "keywords": ["ominous", "gloomy", "serious"]
+    },
+    {
+      "id": "mood_tense",
+      "category": "mood",
+      "value": "tense",
+      "displayName": "緊張感",
+      "displayNameEn": "Tense",
+      "description": "緊張感のある雰囲気",
+      "keywords": ["suspense", "anxious", "dramatic"]
+    },
+    {
+      "id": "mood_relaxed",
+      "category": "mood",
+      "value": "relaxed",
+      "displayName": "リラックス",
+      "displayNameEn": "Relaxed",
+      "description": "リラックスした雰囲気",
+      "keywords": ["calm", "peaceful", "soothing"]
+    },
+    {
+      "id": "mood_epic",
+      "category": "mood",
+      "value": "epic",
+      "displayName": "壮大",
+      "displayNameEn": "Epic",
+      "description": "壮大でドラマチックな雰囲気",
+      "keywords": ["grand", "majestic", "heroic"]
+    },
+    {
+      "id": "mood_sad",
+      "category": "mood",
+      "value": "sad",
+      "displayName": "悲しい",
+      "displayNameEn": "Sad",
+      "description": "悲しく切ない雰囲気",
+      "keywords": ["melancholic", "emotional", "sorrowful"]
+    },
+    {
+      "id": "mood_mysterious",
+      "category": "mood",
+      "value": "mysterious",
+      "displayName": "神秘的",
+      "displayNameEn": "Mysterious",
+      "description": "神秘的で不思議な雰囲気",
+      "keywords": ["enigmatic", "mystical", "ethereal"]
+    },
+    {
+      "id": "mood_heroic",
+      "category": "mood",
+      "value": "heroic",
+      "displayName": "勇敢",
+      "displayNameEn": "Heroic",
+      "description": "勇敢で力強い雰囲気",
+      "keywords": ["brave", "powerful", "triumphant"]
+    },
+    {
+      "id": "scene_title",
+      "category": "scene",
+      "value": "title",
+      "displayName": "タイトル",
+      "displayNameEn": "Title",
+      "description": "タイトル画面用の音楽",
+      "keywords": ["main theme", "opening", "introduction"]
+    },
+    {
+      "id": "scene_menu",
+      "category": "scene",
+      "value": "menu",
+      "displayName": "メニュー",
+      "displayNameEn": "Menu",
+      "description": "メニュー画面用の音楽",
+      "keywords": ["interface", "selection", "ambient"]
+    },
+    {
+      "id": "scene_battle",
+      "category": "scene",
+      "value": "battle",
+      "displayName": "バトル",
+      "displayNameEn": "Battle",
+      "description": "戦闘シーン用の音楽",
+      "keywords": ["combat", "fight", "action"]
+    },
+    {
+      "id": "scene_boss",
+      "category": "scene",
+      "value": "boss",
+      "displayName": "ボス戦",
+      "displayNameEn": "Boss Battle",
+      "description": "ボス戦用の音楽",
+      "keywords": ["climactic", "intense", "final battle"]
+    },
+    {
+      "id": "scene_exploration",
+      "category": "scene",
+      "value": "exploration",
+      "displayName": "探索",
+      "displayNameEn": "Exploration",
+      "description": "探索シーン用の音楽",
+      "keywords": ["wandering", "discovery", "adventure"]
+    },
+    {
+      "id": "scene_victory",
+      "category": "scene",
+      "value": "victory",
+      "displayName": "勝利",
+      "displayNameEn": "Victory",
+      "description": "勝利シーン用の音楽",
+      "keywords": ["triumph", "celebration", "success"]
+    },
+    {
+      "id": "scene_defeat",
+      "category": "scene",
+      "value": "defeat",
+      "displayName": "敗北",
+      "displayNameEn": "Defeat",
+      "description": "敗北シーン用の音楽",
+      "keywords": ["game over", "loss", "failure"]
+    },
+    {
+      "id": "scene_shop",
+      "category": "scene",
+      "value": "shop",
+      "displayName": "ショップ",
+      "displayNameEn": "Shop",
+      "description": "ショップ・店舗用の音楽",
+      "keywords": ["market", "merchant", "trading"]
+    },
+    {
+      "id": "scene_town",
+      "category": "scene",
+      "value": "town",
+      "displayName": "街",
+      "displayNameEn": "Town",
+      "description": "街・村用の音楽",
+      "keywords": ["village", "city", "peaceful"]
+    },
+    {
+      "id": "scene_dungeon",
+      "category": "scene",
+      "value": "dungeon",
+      "displayName": "ダンジョン",
+      "displayNameEn": "Dungeon",
+      "description": "ダンジョン用の音楽",
+      "keywords": ["cave", "underground", "dangerous"]
+    },
+    {
+      "id": "instrument_orchestra",
+      "category": "instrument",
+      "value": "orchestra",
+      "displayName": "オーケストラ",
+      "displayNameEn": "Orchestra",
+      "description": "オーケストラ演奏",
+      "keywords": ["symphonic", "classical", "full orchestra"]
+    },
+    {
+      "id": "instrument_piano",
+      "category": "instrument",
+      "value": "piano",
+      "displayName": "ピアノ",
+      "displayNameEn": "Piano",
+      "description": "ピアノ演奏",
+      "keywords": ["keyboard", "classical piano", "grand piano"]
+    },
+    {
+      "id": "instrument_guitar",
+      "category": "instrument",
+      "value": "guitar",
+      "displayName": "ギター",
+      "displayNameEn": "Guitar",
+      "description": "ギター演奏",
+      "keywords": ["electric guitar", "acoustic guitar", "rock"]
+    },
+    {
+      "id": "instrument_synthesizer",
+      "category": "instrument",
+      "value": "synthesizer",
+      "displayName": "シンセサイザー",
+      "displayNameEn": "Synthesizer",
+      "description": "シンセサイザー演奏",
+      "keywords": ["electronic", "synth", "digital"]
+    },
+    {
+      "id": "instrument_drums",
+      "category": "instrument",
+      "value": "drums",
+      "displayName": "ドラム",
+      "displayNameEn": "Drums",
+      "description": "ドラム演奏",
+      "keywords": ["percussion", "rhythm", "beat"]
+    },
+    {
+      "id": "instrument_strings",
+      "category": "instrument",
+      "value": "strings",
+      "displayName": "弦楽器",
+      "displayNameEn": "Strings",
+      "description": "弦楽器演奏",
+      "keywords": ["violin", "cello", "viola"]
+    },
+    {
+      "id": "instrument_brass",
+      "category": "instrument",
+      "value": "brass",
+      "displayName": "管楽器",
+      "displayNameEn": "Brass",
+      "description": "管楽器演奏",
+      "keywords": ["trumpet", "horn", "trombone"]
+    },
+    {
+      "id": "instrument_choir",
+      "category": "instrument",
+      "value": "choir",
+      "displayName": "合唱",
+      "displayNameEn": "Choir",
+      "description": "合唱・ボーカル",
+      "keywords": ["vocal", "chorus", "voices"]
+    },
+    {
+      "id": "instrument_electronic",
+      "category": "instrument",
+      "value": "electronic",
+      "displayName": "電子音",
+      "displayNameEn": "Electronic",
+      "description": "電子音・デジタルサウンド",
+      "keywords": ["digital", "computer", "techno"]
+    },
+    {
+      "id": "tempo_slow",
+      "category": "tempo",
+      "value": "slow",
+      "displayName": "遅い",
+      "displayNameEn": "Slow",
+      "description": "ゆっくりとしたテンポ（60-90 BPM）",
+      "keywords": ["adagio", "largo", "peaceful"],
+      "metadata": {
+        "bpmMin": 60,
+        "bpmMax": 90
+      }
+    },
+    {
+      "id": "tempo_moderate",
+      "category": "tempo",
+      "value": "moderate",
+      "displayName": "普通",
+      "displayNameEn": "Moderate",
+      "description": "標準的なテンポ（90-120 BPM）",
+      "keywords": ["andante", "moderato", "steady"],
+      "metadata": {
+        "bpmMin": 90,
+        "bpmMax": 120
+      }
+    },
+    {
+      "id": "tempo_fast",
+      "category": "tempo",
+      "value": "fast",
+      "displayName": "速い",
+      "displayNameEn": "Fast",
+      "description": "速いテンポ（120-180 BPM）",
+      "keywords": ["allegro", "vivace", "energetic"],
+      "metadata": {
+        "bpmMin": 120,
+        "bpmMax": 180
+      }
+    },
+    {
+      "id": "tempo_variable",
+      "category": "tempo",
+      "value": "variable",
+      "displayName": "変則的",
+      "displayNameEn": "Variable",
+      "description": "テンポが変化する",
+      "keywords": ["changing", "dynamic", "rubato"]
+    },
+    {
+      "id": "era_retro_8bit",
+      "category": "era",
+      "value": "retro_8bit",
+      "displayName": "レトロ（8bit）",
+      "displayNameEn": "Retro (8-bit)",
+      "description": "8ビット時代のチップチューン",
+      "keywords": ["chiptune", "NES", "classic"]
+    },
+    {
+      "id": "era_retro_16bit",
+      "category": "era",
+      "value": "retro_16bit",
+      "displayName": "レトロ（16bit）",
+      "displayNameEn": "Retro (16-bit)",
+      "description": "16ビット時代のサウンド",
+      "keywords": ["SNES", "Genesis", "nostalgic"]
+    },
+    {
+      "id": "era_modern",
+      "category": "era",
+      "value": "modern",
+      "displayName": "モダン",
+      "displayNameEn": "Modern",
+      "description": "現代的なサウンド",
+      "keywords": ["contemporary", "current", "HD"]
+    },
+    {
+      "id": "era_futuristic",
+      "category": "era",
+      "value": "futuristic",
+      "displayName": "未来的",
+      "displayNameEn": "Futuristic",
+      "description": "未来的・SF的なサウンド",
+      "keywords": ["sci-fi", "space", "cyberpunk"]
+    },
+    {
+      "id": "region_japanese",
+      "category": "region",
+      "value": "japanese",
+      "displayName": "和風",
+      "displayNameEn": "Japanese",
+      "description": "日本風の音楽",
+      "keywords": ["traditional Japanese", "oriental", "shamisen"]
+    },
+    {
+      "id": "region_chinese",
+      "category": "region",
+      "value": "chinese",
+      "displayName": "中華風",
+      "displayNameEn": "Chinese",
+      "description": "中国風の音楽",
+      "keywords": ["traditional Chinese", "erhu", "guzheng"]
+    },
+    {
+      "id": "region_western",
+      "category": "region",
+      "value": "western",
+      "displayName": "西洋風",
+      "displayNameEn": "Western",
+      "description": "西洋風の音楽",
+      "keywords": ["European", "classical", "medieval"]
+    },
+    {
+      "id": "region_celtic",
+      "category": "region",
+      "value": "celtic",
+      "displayName": "ケルト風",
+      "displayNameEn": "Celtic",
+      "description": "ケルト風の音楽",
+      "keywords": ["Irish", "Scottish", "folk"]
+    },
+    {
+      "id": "region_middle_eastern",
+      "category": "region",
+      "value": "middle_eastern",
+      "displayName": "中東風",
+      "displayNameEn": "Middle Eastern",
+      "description": "中東風の音楽",
+      "keywords": ["Arabian", "exotic", "ethnic"]
+    },
+    {
+      "id": "region_latin",
+      "category": "region",
+      "value": "latin",
+      "displayName": "ラテン風",
+      "displayNameEn": "Latin",
+      "description": "ラテン風の音楽",
+      "keywords": ["Spanish", "South American", "salsa"]
+    }
+  ],
+  "presets": [
+    {
+      "id": "preset_rpg_battle",
+      "name": "RPGバトル",
+      "nameEn": "RPG Battle",
+      "description": "RPGの戦闘シーン向けプリセット",
+      "tags": [
+        "genre_rpg",
+        "mood_tense",
+        "scene_battle",
+        "instrument_orchestra",
+        "tempo_fast"
+      ]
+    },
+    {
+      "id": "preset_rpg_boss",
+      "name": "RPGボス戦",
+      "nameEn": "RPG Boss Battle",
+      "description": "RPGのボス戦向けプリセット",
+      "tags": [
+        "genre_rpg",
+        "mood_epic",
+        "scene_boss",
+        "instrument_orchestra",
+        "instrument_choir",
+        "tempo_fast"
+      ]
+    },
+    {
+      "id": "preset_rpg_town",
+      "name": "RPGの街",
+      "nameEn": "RPG Town",
+      "description": "RPGの街・村向けプリセット",
+      "tags": [
+        "genre_rpg",
+        "mood_relaxed",
+        "scene_town",
+        "instrument_strings",
+        "tempo_moderate"
+      ]
+    },
+    {
+      "id": "preset_action_stage",
+      "name": "アクションステージ",
+      "nameEn": "Action Stage",
+      "description": "アクションゲームのステージ向けプリセット",
+      "tags": [
+        "genre_action",
+        "mood_heroic",
+        "scene_exploration",
+        "instrument_electronic",
+        "tempo_fast"
+      ]
+    },
+    {
+      "id": "preset_puzzle_thinking",
+      "name": "パズル思考中",
+      "nameEn": "Puzzle Thinking",
+      "description": "パズルゲームの思考中向けプリセット",
+      "tags": [
+        "genre_puzzle",
+        "mood_relaxed",
+        "instrument_piano",
+        "tempo_slow"
+      ]
+    },
+    {
+      "id": "preset_horror_dungeon",
+      "name": "ホラーダンジョン",
+      "nameEn": "Horror Dungeon",
+      "description": "ホラー系ダンジョン向けプリセット",
+      "tags": [
+        "mood_dark",
+        "mood_mysterious",
+        "scene_dungeon",
+        "instrument_strings",
+        "tempo_slow"
+      ]
+    },
+    {
+      "id": "preset_victory_fanfare",
+      "name": "勝利ファンファーレ",
+      "nameEn": "Victory Fanfare",
+      "description": "勝利時のファンファーレ向けプリセット",
+      "tags": [
+        "mood_bright",
+        "scene_victory",
+        "instrument_brass",
+        "instrument_orchestra",
+        "tempo_fast"
+      ]
+    },
+    {
+      "id": "preset_retro_arcade",
+      "name": "レトロアーケード",
+      "nameEn": "Retro Arcade",
+      "description": "レトロなアーケードゲーム向けプリセット",
+      "tags": [
+        "genre_action",
+        "mood_bright",
+        "instrument_electronic",
+        "tempo_fast",
+        "era_retro_8bit"
+      ]
+    },
+    {
+      "id": "preset_japanese_adventure",
+      "name": "和風アドベンチャー",
+      "nameEn": "Japanese Adventure",
+      "description": "和風アドベンチャーゲーム向けプリセット",
+      "tags": [
+        "genre_adventure",
+        "mood_mysterious",
+        "scene_exploration",
+        "tempo_moderate",
+        "region_japanese"
+      ]
+    }
+  ]
+}
