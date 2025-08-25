@@ -235,7 +235,7 @@ class TestElevenLabs:
 
     def test_is_available(self, gateway: ElevenLabs) -> None:
         """利用可能性チェックのテスト。"""
-        with patch("src.adapters.gateways.elevenlabs_sdk.ElevenLabsClient"):
+        with patch("src.adapters.gateways.elevenlabs.ElevenLabsClient"):
             assert gateway.is_available() is True
 
         # APIキーなしの場合
