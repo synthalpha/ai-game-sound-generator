@@ -17,8 +17,7 @@ from src.di_container.providers import (
 )
 from src.usecases.common.interfaces import (
     AudioGeneratorGateway,
-    AudioRepository,
-    TagRepository,
+    MusicFileRepository,
 )
 
 
@@ -42,14 +41,11 @@ class TestRepositoryProvider:
         provider.register()
 
         # リポジトリが登録されていることを確認
-        assert container.has_registration(AudioRepository)
-        assert container.has_registration(TagRepository)
+        assert container.has_registration(MusicFileRepository)
 
         # インスタンスが取得できることを確認
-        audio_repo = container.resolve(AudioRepository)
-        tag_repo = container.resolve(TagRepository)
-        assert audio_repo is not None
-        assert tag_repo is not None
+        music_repo = container.resolve(MusicFileRepository)
+        assert music_repo is not None
 
     def test_register_in_test(self) -> None:
         """テスト環境でのリポジトリ登録テスト。"""
@@ -60,8 +56,7 @@ class TestRepositoryProvider:
         provider.register()
 
         # リポジトリが登録されていることを確認
-        assert container.has_registration(AudioRepository)
-        assert container.has_registration(TagRepository)
+        assert container.has_registration(MusicFileRepository)
 
     def test_singleton_repositories(self) -> None:
         """リポジトリがシングルトンであることのテスト。"""
@@ -72,8 +67,8 @@ class TestRepositoryProvider:
         provider.register()
 
         # 同じインスタンスが返されることを確認
-        repo1 = container.resolve(AudioRepository)
-        repo2 = container.resolve(AudioRepository)
+        repo1 = container.resolve(MusicFileRepository)
+        repo2 = container.resolve(MusicFileRepository)
         assert repo1 is repo2
 
 
@@ -150,6 +145,5 @@ class TestRegisterAllProviders:
         container = get_container()
 
         # 主要なサービスが登録されていることを確認
-        assert container.has_registration(AudioRepository)
-        assert container.has_registration(TagRepository)
+        assert container.has_registration(MusicFileRepository)
         assert container.has_registration(AudioGeneratorGateway)

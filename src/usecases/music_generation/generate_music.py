@@ -10,7 +10,6 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from src.adapters.gateways.elevenlabs_sdk import ElevenLabsMusicGateway
 from src.adapters.repositories.music_file_storage import MusicFileStorageRepository
 from src.entities.exceptions import (
     AudioGenerationError,
@@ -26,6 +25,7 @@ from src.entities.music_generation import (
 )
 from src.entities.tag import TagCategory
 from src.usecases.base import UseCase
+from src.usecases.common.interfaces import AudioGeneratorGateway
 from src.utils.decorators import async_timer
 
 
@@ -77,7 +77,7 @@ class GenerateMusicUseCase(UseCase[GenerateMusicInput, GenerateMusicOutput]):
 
     def __init__(
         self,
-        music_gateway: ElevenLabsMusicGateway,
+        music_gateway: AudioGeneratorGateway,
         file_storage: MusicFileStorageRepository | None = None,
         prompt_template: str | None = None,
     ) -> None:

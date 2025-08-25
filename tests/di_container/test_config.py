@@ -90,14 +90,18 @@ class TestConfig:
 
     def test_elevenlabs_config(self) -> None:
         """ElevenLabs設定のテスト。"""
-        with patch.dict(
-            os.environ,
-            {
-                "ELEVENLABS_API_KEY": "test_key",
-                "ELEVENLABS_BASE_URL": "https://test.api.com",
-                "ELEVENLABS_TIMEOUT": "60.0",
-                "ELEVENLABS_MAX_RETRIES": "5",
-            },
+        with (
+            patch("src.di_container.config.load_environment"),
+            patch("src.di_container.config.get_api_key", return_value="test_key"),
+            patch.dict(
+                os.environ,
+                {
+                    "ELEVENLABS_BASE_URL": "https://test.api.com",
+                    "ELEVENLABS_TIMEOUT": "60.0",
+                    "ELEVENLABS_MAX_RETRIES": "5",
+                },
+                clear=True,
+            ),
         ):
             config = Config()
             assert config.elevenlabs.api_key == "test_key"
