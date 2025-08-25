@@ -10,9 +10,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.adapters.gateways.elevenlabs_sdk import (
+from src.adapters.gateways.elevenlabs import (
     CompositionPlan,
-    ElevenLabsMusicGateway,
+    ElevenLabs,
 )
 from src.di_container.config import ElevenLabsConfig
 from src.entities.exceptions import (
@@ -39,9 +39,9 @@ def elevenlabs_config() -> ElevenLabsConfig:
 
 
 @pytest.fixture
-def gateway(elevenlabs_config: ElevenLabsConfig) -> ElevenLabsMusicGateway:
+def gateway(elevenlabs_config: ElevenLabsConfig) -> ElevenLabs:
     """ゲートウェイフィクスチャ。"""
-    return ElevenLabsMusicGateway(elevenlabs_config)
+    return ElevenLabs(elevenlabs_config)
 
 
 @pytest.fixture
@@ -56,18 +56,18 @@ def music_request() -> MusicGenerationRequest:
     )
 
 
-class TestElevenLabsMusicGateway:
-    """ElevenLabsMusicGatewayのテスト。"""
+class TestElevenLabs:
+    """ElevenLabsゲートウェイのテスト。"""
 
     def test_init(self, elevenlabs_config: ElevenLabsConfig) -> None:
         """初期化のテスト。"""
-        gateway = ElevenLabsMusicGateway(elevenlabs_config)
+        gateway = ElevenLabs(elevenlabs_config)
         assert gateway._config == elevenlabs_config
         assert gateway._client is None
 
-    def test_get_client_lazy_init(self, gateway: ElevenLabsMusicGateway) -> None:
+    def test_get_client_lazy_init(self, gateway: ElevenLabs) -> None:
         """クライアント遅延初期化のテスト。"""
-        with patch("src.adapters.gateways.elevenlabs_sdk.ElevenLabsClient") as mock_client_class:
+        with patch("src.adapters.gateways.elevenlabs.ElevenLabsClient") as mock_client_class:
             mock_client = MagicMock()
             mock_client_class.return_value = mock_client
 
@@ -83,7 +83,7 @@ class TestElevenLabsMusicGateway:
             assert client2 == client1
             assert mock_client_class.call_count == 1
 
-    def test_get_client_no_api_key(self, gateway: ElevenLabsMusicGateway) -> None:
+    def test_get_client_no_api_key(self, gateway: ElevenLabs) -> None:
         """APIキーなしのテスト。"""
         gateway._config.api_key = ""
 
@@ -93,7 +93,7 @@ class TestElevenLabsMusicGateway:
     @pytest.mark.asyncio
     async def test_compose_music_wav_output(
         self,
-        gateway: ElevenLabsMusicGateway,
+        gateway: ElevenLabs,
         music_request: MusicGenerationRequest,
     ) -> None:
         """音楽生成（WAV出力）のテスト。"""
@@ -102,7 +102,7 @@ class TestElevenLabsMusicGateway:
         mock_wav_data = b"test_wav_data"
         mock_track = BytesIO(mock_mp3_data)
 
-        with patch("src.adapters.gateways.elevenlabs_sdk.ElevenLabsClient") as mock_client_class:
+        with patch("src.adapters.gateways.elevenlabs.ElevenLabsClient") as mock_client_class:
             mock_client = MagicMock()
             mock_client.music.compose.return_value = mock_track
             mock_client_class.return_value = mock_client
@@ -127,7 +127,7 @@ class TestElevenLabsMusicGateway:
     @pytest.mark.asyncio
     async def test_compose_music_mp3_output(
         self,
-        gateway: ElevenLabsMusicGateway,
+        gateway: ElevenLabs,
         music_request: MusicGenerationRequest,
     ) -> None:
         """音楽生成（MP3出力）のテスト。"""
@@ -135,7 +135,7 @@ class TestElevenLabsMusicGateway:
         mock_mp3_data = b"test_mp3_data"
         mock_track = BytesIO(mock_mp3_data)
 
-        with patch("src.adapters.gateways.elevenlabs_sdk.ElevenLabsClient") as mock_client_class:
+        with patch("src.adapters.gateways.elevenlabs.ElevenLabsClient") as mock_client_class:
             mock_client = MagicMock()
             mock_client.music.compose.return_value = mock_track
             mock_client_class.return_value = mock_client
@@ -153,11 +153,11 @@ class TestElevenLabsMusicGateway:
     @pytest.mark.asyncio
     async def test_compose_music_rate_limit(
         self,
-        gateway: ElevenLabsMusicGateway,
+        gateway: ElevenLabs,
         music_request: MusicGenerationRequest,
     ) -> None:
         """レート制限エラーのテスト。"""
-        with patch("src.adapters.gateways.elevenlabs_sdk.ElevenLabsClient") as mock_client_class:
+        with patch("src.adapters.gateways.elevenlabs.ElevenLabsClient") as mock_client_class:
             mock_client = MagicMock()
 
             # ApiErrorをモック
@@ -171,7 +171,7 @@ class TestElevenLabsMusicGateway:
                 await gateway.compose_music(music_request)
 
     @pytest.mark.asyncio
-    async def test_compose_with_plan_wav_output(self, gateway: ElevenLabsMusicGateway) -> None:
+    async def test_compose_with_plan_wav_output(self, gateway: ElevenLabs) -> None:
         """プランベースの音楽生成（WAV出力）のテスト。"""
         plan = CompositionPlan(
             positive_global_styles=["epic", "orchestral"],
@@ -186,7 +186,7 @@ class TestElevenLabsMusicGateway:
         mock_wav_data = b"planned_wav_data"
         mock_track = BytesIO(mock_mp3_data)
 
-        with patch("src.adapters.gateways.elevenlabs_sdk.ElevenLabsClient") as mock_client_class:
+        with patch("src.adapters.gateways.elevenlabs.ElevenLabsClient") as mock_client_class:
             mock_client = MagicMock()
             mock_client.music.compose.return_value = mock_track
             mock_client_class.return_value = mock_client
@@ -208,7 +208,7 @@ class TestElevenLabsMusicGateway:
                 # MP3からWAVへの変換が呼ばれたことを確認
                 mock_mp3_to_wav.assert_called_once_with(mock_mp3_data)
 
-    def test_save_music_file(self, gateway: ElevenLabsMusicGateway, tmp_path: Path) -> None:
+    def test_save_music_file(self, gateway: ElevenLabs, tmp_path: Path) -> None:
         """音楽ファイル保存のテスト。"""
         music_file = MusicFile(
             file_name="test.mp3",
@@ -222,7 +222,7 @@ class TestElevenLabsMusicGateway:
         assert output_path.exists()
         assert output_path.read_bytes() == b"test_audio_data"
 
-    def test_save_music_file_no_data(self, gateway: ElevenLabsMusicGateway, tmp_path: Path) -> None:
+    def test_save_music_file_no_data(self, gateway: ElevenLabs, tmp_path: Path) -> None:
         """データなしでの保存エラーテスト。"""
         music_file = MusicFile(
             file_name="test.mp3",
@@ -233,7 +233,7 @@ class TestElevenLabsMusicGateway:
         with pytest.raises(ValueError, match="保存するデータがありません"):
             gateway.save_music_file(music_file, tmp_path / "test.mp3")
 
-    def test_is_available(self, gateway: ElevenLabsMusicGateway) -> None:
+    def test_is_available(self, gateway: ElevenLabs) -> None:
         """利用可能性チェックのテスト。"""
         with patch("src.adapters.gateways.elevenlabs_sdk.ElevenLabsClient"):
             assert gateway.is_available() is True
