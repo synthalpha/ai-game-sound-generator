@@ -205,3 +205,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ローカル情報管理ディレクトリ
+# このディレクトリはローカル開発環境でのみ使用される情報を管理
+.local/
