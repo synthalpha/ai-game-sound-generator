@@ -11,36 +11,43 @@ Tokyo Game Show 2025展示用プロトタイプ
 - **カスタマイズ可能**: テンポ、楽器、ムードなどを細かく調整
 - **高品質出力**: ElevenLabs APIを活用した高品質な音声生成
 
+## 技術スタック
+
+### バックエンド
+- **Python 3.12** - メイン開発言語
+- **FastAPI** - 高性能な非同期WebAPI フレームワーク
+- **Pydantic** - データバリデーション
+- **uv** - 高速なPythonパッケージマネージャー
+
+### フロントエンド
+- **Streamlit** - データアプリケーション構築フレームワーク
+- **HTML/CSS** - カスタムスタイリング
+
+### AI/音声生成
+- **ElevenLabs API** - 高品質な音声合成API
+
+### インフラ/ツール
+- **Docker & Docker Compose** - コンテナ化とオーケストレーション
+- **GitHub Actions** - CI/CDパイプライン
+- **Ruff** - 高速なPythonリンター/フォーマッター
+- **pytest** - テストフレームワーク
+
 ## 必要環境
 
 - Docker Desktop
-- Visual Studio Code（推奨）
+- Visual Studio Code
 - Git
 
 ## セットアップ
 
-### 推奨: VS Code Dev Containers
+### 前提条件
 
-1. リポジトリをクローン
-```bash
-git clone https://github.com/synthalpha/ai-game-sound-generator.git
-cd ai-game-sound-generator
-```
+1. **ElevenLabs APIキーの取得**
+   - [ElevenLabs](https://elevenlabs.io/)でアカウントを作成
+   - ダッシュボードからAPIキーを取得
+   - 無料プランでも利用可能（月10,000文字まで）
 
-2. 環境変数を設定
-```bash
-cp .env.example .env
-# .envファイルを編集してElevenLabs APIキーなどを設定
-```
-
-3. VS Codeで開く
-```bash
-code .
-```
-
-4. 「Reopen in Container」を選択（自動プロンプトまたは左下の緑アイコンから）
-
-### 代替: Docker Compose
+2. **環境構築**
 
 ```bash
 # リポジトリをクローン
@@ -49,9 +56,26 @@ cd ai-game-sound-generator
 
 # 環境変数を設定
 cp .env.example .env
+# .envファイルを編集してELEVENLABS_API_KEYを設定
 
 # Dockerコンテナを起動
 docker compose up -d
+```
+
+### 環境変数の設定
+
+`.env`ファイルの主要な設定項目：
+
+```env
+# ElevenLabs API設定（必須）
+ELEVENLABS_API_KEY=your_api_key_here
+
+# Docker環境設定
+DOCKER_ENV=development  # development or production
+
+# ポート設定（任意）
+API_PORT=8000
+STREAMLIT_PORT=8501
 ```
 
 ## 使い方
