@@ -10,6 +10,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from src.utils.env import get_api_key, load_environment
+
 
 class Environment(Enum):
     """環境種別。"""
@@ -83,6 +85,8 @@ class Config:
 
     def __init__(self, environment: Environment | None = None) -> None:
         """初期化。"""
+        # 環境変数を読み込み
+        load_environment()
         self._environment = environment or self._detect_environment()
         self._load_config()
 
@@ -149,8 +153,10 @@ class Config:
         )
 
         # ElevenLabs設定
+        # APIキーは必須ではない（テスト環境など）
+        api_key = get_api_key("ELEVENLABS", required=False) or ""
         self._elevenlabs_config = ElevenLabsConfig(
-            api_key=os.getenv("ELEVENLABS_API_KEY", ""),
+            api_key=api_key,
             base_url=os.getenv("ELEVENLABS_BASE_URL", "https://api.elevenlabs.io/v1"),
             timeout=float(os.getenv("ELEVENLABS_TIMEOUT", "30.0")),
             max_retries=int(os.getenv("ELEVENLABS_MAX_RETRIES", "3")),

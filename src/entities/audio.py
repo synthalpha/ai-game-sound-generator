@@ -31,6 +31,14 @@ class AudioFormat(Enum):
     M4A = "m4a"
 
 
+class AudioQualityEnum(Enum):
+    """音質設定列挙型。"""
+
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+
+
 @dataclass(frozen=True)
 class AudioDuration(ValueObject):
     """音楽の長さ値オブジェクト。"""
@@ -172,6 +180,41 @@ class Audio(Entity):
     def can_retry(self) -> bool:
         """リトライ可能か。"""
         return self.status in [AudioStatus.FAILED, AudioStatus.CANCELLED]
+
+
+@dataclass(frozen=True)
+class AudioFile(ValueObject):
+    """音楽ファイル値オブジェクト。
+
+    生成された音楽ファイルの実データを保持します。
+    """
+
+    prompt: str
+    duration_seconds: int
+    quality: AudioQualityEnum
+    data: bytes | None = None
+    external_id: str | None = None
+
+    @property
+    def milliseconds(self) -> int:
+        """ミリ秒単位での長さを取得。
+
+        ElevenLabs APIとの互換性のため。
+        """
+        return self.duration_seconds * 1000
+
+    def save_to_file(self, path: str) -> None:
+        """ファイルに保存。
+
+        Args:
+            path: 保存先パス
+        """
+        if not self.data:
+            raise ValueError("保存するデータがありません")
+
+        from pathlib import Path
+
+        Path(path).write_bytes(self.data)
 
 
 class AudioCollection(Entity):

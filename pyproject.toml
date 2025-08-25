@@ -18,6 +18,9 @@ dependencies = [
     "structlog>=24.6.0",
     "streamlit>=1.48.0",
     "streamlit-extras>=0.4.0",
+    "cryptography>=45.0.6",
+    "elevenlabs>=2.12.1",
+    "pydub>=0.25.1",
 ]
 
 [project.optional-dependencies]
@@ -63,12 +66,17 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.pytest.ini_options]
+minversion = "6.0"
 testpaths = ["tests"]
+pythonpath = ["."]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-ra -q --strict-markers --cov=src --cov-report=term-missing"
+addopts = "-ra -q --strict-markers --cov=src --cov-report=term-missing --cov-report=html"
 asyncio_mode = "auto"
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+]
 
 [tool.coverage.run]
 branch = true
