@@ -16,7 +16,12 @@
         <!-- 左側: タグ選択パネル -->
         <div class="lg:col-span-1">
             <div class="glass rounded-2xl p-6 shadow-2xl">
-                <h2 class="text-2xl font-bold mb-6 text-purple-300">🎵 音楽生成設定</h2>
+                <h2 class="text-2xl font-bold mb-6 text-purple-300 flex items-center">
+                    <svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                    </svg>
+                    音楽生成設定
+                </h2>
                 
                 <!-- ローディング表示 -->
                 <div x-show="isLoading" class="text-center py-8">
@@ -28,14 +33,35 @@
                 <div x-show="!isLoading">
                 <!-- ジャンル -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-200">ジャンル</h3>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200 flex items-center">
+                        <div class="flex items-center bg-gradient-to-r from-yellow-500/20 to-yellow-400/10 rounded-full px-3 py-1 mr-3">
+                            <svg class="w-4 h-4 text-yellow-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <span class="text-xs text-yellow-400 font-medium">1つのみ</span>
+                        </div>
+                        <svg class="w-5 h-5 text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4"></path>
+                        </svg>
+                        ジャンル
+                    </h3>
                     <div class="grid grid-cols-2 gap-2">
                         <template x-for="genre in genres">
                             <button 
                                 @click="toggleTag('genre', genre.name)"
-                                :class="selectedTags.genre.includes(genre.name) ? 'bg-purple-600 border-purple-400' : 'bg-gray-800 border-gray-600 hover:border-purple-400'"
-                                class="px-3 py-2 rounded-lg border transition-all duration-200 text-sm"
-                                x-text="genre.name_ja || genre.name">
+                                :disabled="selectedTags.genre.length > 0 && !selectedTags.genre.includes(genre.name)"
+                                :class="{
+                                    'bg-gradient-to-r from-purple-600 to-purple-500 border-purple-400 shadow-lg shadow-purple-500/50 scale-105 ring-2 ring-purple-400/50': selectedTags.genre.includes(genre.name),
+                                    'bg-gray-800/50 border-gray-600 hover:border-purple-400 hover:bg-gray-700/50': !selectedTags.genre.includes(genre.name) && selectedTags.genre.length === 0,
+                                    'bg-gray-900/30 border-gray-700/50 opacity-30 cursor-not-allowed': selectedTags.genre.length > 0 && !selectedTags.genre.includes(genre.name)
+                                }"
+                                class="px-3 py-2 rounded-lg border-2 transition-all duration-200 text-sm relative overflow-hidden group">
+                                <span class="relative z-10" x-text="genre.name_ja || genre.name"></span>
+                                <div x-show="selectedTags.genre.includes(genre.name)" class="absolute top-1 right-1">
+                                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
                             </button>
                         </template>
                     </div>
@@ -43,14 +69,35 @@
                 
                 <!-- ムード -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-200">ムード</h3>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200 flex items-center">
+                        <div class="flex items-center bg-gradient-to-r from-yellow-500/20 to-yellow-400/10 rounded-full px-3 py-1 mr-3">
+                            <svg class="w-4 h-4 text-yellow-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <span class="text-xs text-yellow-400 font-medium">1つのみ</span>
+                        </div>
+                        <svg class="w-5 h-5 text-pink-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                        ムード
+                    </h3>
                     <div class="grid grid-cols-2 gap-2">
                         <template x-for="mood in moods">
                             <button 
                                 @click="toggleTag('mood', mood.name)"
-                                :class="selectedTags.mood.includes(mood.name) ? 'bg-pink-600 border-pink-400' : 'bg-gray-800 border-gray-600 hover:border-pink-400'"
-                                class="px-3 py-2 rounded-lg border transition-all duration-200 text-sm"
-                                x-text="mood.name_ja || mood.name">
+                                :disabled="selectedTags.mood.length > 0 && !selectedTags.mood.includes(mood.name)"
+                                :class="{
+                                    'bg-gradient-to-r from-pink-600 to-pink-500 border-pink-400 shadow-lg shadow-pink-500/50 scale-105 ring-2 ring-pink-400/50': selectedTags.mood.includes(mood.name),
+                                    'bg-gray-800/50 border-gray-600 hover:border-pink-400 hover:bg-gray-700/50': !selectedTags.mood.includes(mood.name) && selectedTags.mood.length === 0,
+                                    'bg-gray-900/30 border-gray-700/50 opacity-30 cursor-not-allowed': selectedTags.mood.length > 0 && !selectedTags.mood.includes(mood.name)
+                                }"
+                                class="px-3 py-2 rounded-lg border-2 transition-all duration-200 text-sm relative overflow-hidden group">
+                                <span class="relative z-10" x-text="mood.name_ja || mood.name"></span>
+                                <div x-show="selectedTags.mood.includes(mood.name)" class="absolute top-1 right-1">
+                                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
                             </button>
                         </template>
                     </div>
@@ -58,14 +105,35 @@
                 
                 <!-- シーン -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-200">シーン</h3>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200 flex items-center">
+                        <div class="flex items-center bg-gradient-to-r from-blue-500/20 to-blue-400/10 rounded-full px-3 py-1 mr-3">
+                            <svg class="w-4 h-4 text-blue-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            <span class="text-xs text-blue-400 font-medium" x-text="`${selectedTags.scene.length}/2`"></span>
+                        </div>
+                        <svg class="w-5 h-5 text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        シーン
+                    </h3>
                     <div class="grid grid-cols-2 gap-2">
                         <template x-for="scene in scenes">
                             <button 
                                 @click="toggleTag('scene', scene.name)"
-                                :class="selectedTags.scene.includes(scene.name) ? 'bg-blue-600 border-blue-400' : 'bg-gray-800 border-gray-600 hover:border-blue-400'"
-                                class="px-3 py-2 rounded-lg border transition-all duration-200 text-sm"
-                                x-text="scene.name_ja || scene.name">
+                                :disabled="selectedTags.scene.length >= 2 && !selectedTags.scene.includes(scene.name)"
+                                :class="{
+                                    'bg-gradient-to-r from-blue-600 to-blue-500 border-blue-400 shadow-lg shadow-blue-500/50 scale-105 ring-2 ring-blue-400/50': selectedTags.scene.includes(scene.name),
+                                    'bg-gray-800/50 border-gray-600 hover:border-blue-400 hover:bg-gray-700/50': !selectedTags.scene.includes(scene.name) && selectedTags.scene.length < 2,
+                                    'bg-gray-900/30 border-gray-700/50 opacity-30 cursor-not-allowed': selectedTags.scene.length >= 2 && !selectedTags.scene.includes(scene.name)
+                                }"
+                                class="px-3 py-2 rounded-lg border-2 transition-all duration-200 text-sm relative overflow-hidden group">
+                                <span class="relative z-10" x-text="scene.name_ja || scene.name"></span>
+                                <div x-show="selectedTags.scene.includes(scene.name)" class="absolute top-1 right-1">
+                                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
                             </button>
                         </template>
                     </div>
@@ -73,14 +141,25 @@
                 
                 <!-- 楽器 -->
                 <div class="mb-6" x-show="instruments.length > 0">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-200">楽器</h3>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200 flex items-center">
+                        <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                        </svg>
+                        楽器
+                        <span class="ml-2 text-xs text-gray-400" x-show="selectedTags.instrument.length > 0" x-text="`(${selectedTags.instrument.length}選択中)`"></span>
+                    </h3>
                     <div class="grid grid-cols-2 gap-2">
                         <template x-for="instrument in instruments">
                             <button 
                                 @click="toggleTag('instrument', instrument.name)"
-                                :class="selectedTags.instrument && selectedTags.instrument.includes(instrument.name) ? 'bg-green-600 border-green-400' : 'bg-gray-800 border-gray-600 hover:border-green-400'"
-                                class="px-3 py-2 rounded-lg border transition-all duration-200 text-sm"
-                                x-text="instrument.name_ja || instrument.name">
+                                :class="selectedTags.instrument && selectedTags.instrument.includes(instrument.name) ? 'bg-gradient-to-r from-green-600 to-green-500 border-green-400 shadow-lg shadow-green-500/50 scale-105' : 'bg-gray-800/50 border-gray-600 hover:border-green-400 hover:bg-gray-700/50'"
+                                class="px-3 py-2 rounded-lg border-2 transition-all duration-200 text-sm relative overflow-hidden">
+                                <span class="relative z-10" x-text="instrument.name_ja || instrument.name"></span>
+                                <div x-show="selectedTags.instrument && selectedTags.instrument.includes(instrument.name)" class="absolute top-1 right-1">
+                                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
                             </button>
                         </template>
                     </div>
@@ -88,14 +167,29 @@
                 
                 <!-- テンポ -->
                 <div class="mb-6" x-show="tempos.length > 0">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-200">テンポ</h3>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200 flex items-center">
+                        <svg class="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        テンポ
+                    </h3>
                     <div class="grid grid-cols-2 gap-2">
                         <template x-for="tempo in tempos">
                             <button 
                                 @click="toggleTag('tempo', tempo.name)"
-                                :class="selectedTags.tempo && selectedTags.tempo.includes(tempo.name) ? 'bg-yellow-600 border-yellow-400' : 'bg-gray-800 border-gray-600 hover:border-yellow-400'"
-                                class="px-3 py-2 rounded-lg border transition-all duration-200 text-sm"
-                                x-text="tempo.name_ja || tempo.name">
+                                :disabled="selectedTags.tempo.length > 0 && !selectedTags.tempo.includes(tempo.name)"
+                                :class="{
+                                    'bg-gradient-to-r from-yellow-600 to-yellow-500 border-yellow-400 shadow-lg shadow-yellow-500/50 scale-105 ring-2 ring-yellow-400/50': selectedTags.tempo.includes(tempo.name),
+                                    'bg-gray-800/50 border-gray-600 hover:border-yellow-400 hover:bg-gray-700/50': !selectedTags.tempo.includes(tempo.name) && selectedTags.tempo.length === 0,
+                                    'bg-gray-900/30 border-gray-700/50 opacity-30 cursor-not-allowed': selectedTags.tempo.length > 0 && !selectedTags.tempo.includes(tempo.name)
+                                }"
+                                class="px-3 py-2 rounded-lg border-2 transition-all duration-200 text-sm relative overflow-hidden">
+                                <span class="relative z-10" x-text="tempo.name_ja || tempo.name"></span>
+                                <div x-show="selectedTags.tempo.includes(tempo.name)" class="absolute top-1 right-1">
+                                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
                             </button>
                         </template>
                     </div>
@@ -103,7 +197,13 @@
                 
                 <!-- 音楽の長さ -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-200">⚙️ 詳細設定</h3>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        詳細設定
+                    </h3>
                     <label class="block text-sm text-gray-300 mb-2">音楽の長さ: <span x-text="duration"></span>秒</label>
                     <input 
                         type="range" 
@@ -120,7 +220,13 @@
                     :disabled="!canGenerate()"
                     :class="canGenerate() ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' : 'bg-gray-700 cursor-not-allowed'"
                     class="w-full py-3 px-4 rounded-xl font-bold transition-all duration-200 transform hover:scale-105">
-                    <span x-show="!isGenerating">🎼 音楽を生成</span>
+                    <span x-show="!isGenerating" class="flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        音楽を生成
+                    </span>
                     <span x-show="isGenerating" class="flex items-center justify-center">
                         <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
@@ -136,12 +242,19 @@
         <!-- 右側: 生成結果パネル -->
         <div class="lg:col-span-2">
             <div class="glass rounded-2xl p-6 shadow-2xl min-h-[600px]">
-                <h2 class="text-2xl font-bold mb-6 text-purple-300">🎧 生成結果</h2>
+                <h2 class="text-2xl font-bold mb-6 text-purple-300 flex items-center">
+                    <svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                    </svg>
+                    生成結果
+                </h2>
                 
                 <!-- 結果表示エリア -->
                 <div x-show="!generatedMusic && !isGenerating" class="flex items-center justify-center h-96">
                     <div class="text-center">
-                        <div class="text-6xl mb-4">🎵</div>
+                        <svg class="w-24 h-24 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                        </svg>
                         <p class="text-gray-400">左側でタグを選択して、音楽を生成してください</p>
                     </div>
                 </div>
@@ -172,7 +285,12 @@
                         <div class="bg-gradient-to-r from-purple-900 to-pink-900 rounded-xl p-6">
                             <audio controls class="w-full" x-show="audioUrl" :src="audioUrl"></audio>
                             <div x-show="!audioUrl" class="text-center py-4">
-                                <p class="text-yellow-400">⚠️ 音声データはデモモードのため生成されていません</p>
+                                <p class="text-yellow-400 flex items-center justify-center">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    音声データはデモモードのため生成されていません
+                                </p>
                                 <p class="text-sm text-gray-400 mt-2">ElevenLabs APIキーを設定すると実際の音楽が生成されます</p>
                             </div>
                             <!-- ビジュアライザー（装飾） -->
@@ -188,14 +306,17 @@
                     <!-- アクションボタン -->
                     <div class="flex space-x-4">
                         <a :href="downloadUrl" :download="`generated_music_${duration}s.mp3`" 
-                           class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 px-4 rounded-lg transition-colors text-center">
-                            💾 ダウンロード
+                           class="flex-1 bg-purple-600 hover:bg-purple-700 py-3 px-4 rounded-lg transition-colors flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            ダウンロード
                         </a>
-                        <button @click="shareMusic()" class="flex-1 bg-pink-600 hover:bg-pink-700 py-2 px-4 rounded-lg transition-colors">
-                            🔗 共有
-                        </button>
-                        <button @click="resetGenerator()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 px-4 rounded-lg transition-colors">
-                            🔄 新規生成
+                        <button @click="resetGenerator()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-3 px-4 rounded-lg transition-colors flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            新規生成
                         </button>
                     </div>
                     
@@ -377,9 +498,6 @@ function musicGenerator() {
             return new Blob([byteArray], { type: mimeType });
         },
         
-        shareMusic() {
-            alert('共有機能は準備中です');
-        },
         
         resetGenerator() {
             this.generatedMusic = false;
