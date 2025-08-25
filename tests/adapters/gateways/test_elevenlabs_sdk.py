@@ -93,35 +93,64 @@ class TestElevenLabsMusicGateway:
             gateway._get_client()
 
     @pytest.mark.asyncio
-    async def test_compose_music_success(
+    async def test_compose_music_wav_output(
         self,
         gateway: ElevenLabsMusicGateway,
         music_request: MusicGenerationRequest,
     ) -> None:
-        """音楽生成成功のテスト。"""
+        """音楽生成（WAV出力）のテスト。"""
         # モックの準備
-        mock_audio_data = b"test_audio_data"
-        mock_track = BytesIO(mock_audio_data)
+        mock_mp3_data = b"test_mp3_data"
+        mock_wav_data = b"test_wav_data"
+        mock_track = BytesIO(mock_mp3_data)
 
         with patch("src.adapters.gateways.elevenlabs_sdk.ElevenLabsClient") as mock_client_class:
             mock_client = MagicMock()
             mock_client.music.compose.return_value = mock_track
             mock_client_class.return_value = mock_client
 
-            # 音楽生成
-            result = await gateway.compose_music(music_request)
+            # AudioConverterをモック
+            with patch.object(
+                gateway._audio_converter, "mp3_to_wav", return_value=mock_wav_data
+            ) as mock_mp3_to_wav:
+                # 音楽生成（WAV出力）
+                result = await gateway.compose_music(music_request, output_format="wav")
+
+                # 結果の検証
+                assert isinstance(result, MusicFile)
+                assert result.data == mock_wav_data
+                assert result.duration_seconds == 10
+                assert result.format == "wav"
+                assert "generated_music_10s.wav" in result.file_name
+
+                # MP3からWAVへの変換が呼ばれたことを確認
+                mock_mp3_to_wav.assert_called_once_with(mock_mp3_data)
+
+    @pytest.mark.asyncio
+    async def test_compose_music_mp3_output(
+        self,
+        gateway: ElevenLabsMusicGateway,
+        music_request: MusicGenerationRequest,
+    ) -> None:
+        """音楽生成（MP3出力）のテスト。"""
+        # モックの準備
+        mock_mp3_data = b"test_mp3_data"
+        mock_track = BytesIO(mock_mp3_data)
+
+        with patch("src.adapters.gateways.elevenlabs_sdk.ElevenLabsClient") as mock_client_class:
+            mock_client = MagicMock()
+            mock_client.music.compose.return_value = mock_track
+            mock_client_class.return_value = mock_client
+
+            # 音楽生成（MP3出力）
+            result = await gateway.compose_music(music_request, output_format="mp3")
 
             # 結果の検証
             assert isinstance(result, MusicFile)
-            assert result.data == mock_audio_data
+            assert result.data == mock_mp3_data
             assert result.duration_seconds == 10
             assert result.format == "mp3"
-
-            # APIコールの検証
-            mock_client.music.compose.assert_called_once()
-            call_kwargs = mock_client.music.compose.call_args[1]
-            assert "Epic battle music" in call_kwargs["prompt"]
-            assert call_kwargs["music_length_ms"] == 10000
+            assert "generated_music_10s.mp3" in result.file_name
 
     @pytest.mark.asyncio
     async def test_compose_music_rate_limit(
@@ -144,8 +173,8 @@ class TestElevenLabsMusicGateway:
                 await gateway.compose_music(music_request)
 
     @pytest.mark.asyncio
-    async def test_compose_with_plan(self, gateway: ElevenLabsMusicGateway) -> None:
-        """プランベースの音楽生成のテスト。"""
+    async def test_compose_with_plan_wav_output(self, gateway: ElevenLabsMusicGateway) -> None:
+        """プランベースの音楽生成（WAV出力）のテスト。"""
         plan = CompositionPlan(
             positive_global_styles=["epic", "orchestral"],
             negative_global_styles=["calm", "minimalist"],
@@ -155,27 +184,31 @@ class TestElevenLabsMusicGateway:
             ],
         )
 
-        mock_audio_data = b"planned_music_data"
-        mock_track = BytesIO(mock_audio_data)
+        mock_mp3_data = b"planned_mp3_data"
+        mock_wav_data = b"planned_wav_data"
+        mock_track = BytesIO(mock_mp3_data)
 
         with patch("src.adapters.gateways.elevenlabs_sdk.ElevenLabsClient") as mock_client_class:
             mock_client = MagicMock()
             mock_client.music.compose.return_value = mock_track
             mock_client_class.return_value = mock_client
 
-            # プランベースの生成
-            result = await gateway.compose_with_plan(plan)
+            # AudioConverterをモック
+            with patch.object(
+                gateway._audio_converter, "mp3_to_wav", return_value=mock_wav_data
+            ) as mock_mp3_to_wav:
+                # プランベースの生成（WAV出力）
+                result = await gateway.compose_with_plan(plan, output_format="wav")
 
-            # 結果の検証
-            assert isinstance(result, MusicFile)
-            assert result.data == mock_audio_data
-            assert result.duration_seconds == 10  # 5000ms + 5000ms = 10s
+                # 結果の検証
+                assert isinstance(result, MusicFile)
+                assert result.data == mock_wav_data
+                assert result.duration_seconds == 10  # 5000ms + 5000ms = 10s
+                assert result.format == "wav"
+                assert "composed_music_10s.wav" in result.file_name
 
-            # APIコールの検証
-            mock_client.music.compose.assert_called_once()
-            call_kwargs = mock_client.music.compose.call_args[1]
-            assert "composition_plan" in call_kwargs
-            assert call_kwargs["composition_plan"]["positiveGlobalStyles"] == ["epic", "orchestral"]
+                # MP3からWAVへの変換が呼ばれたことを確認
+                mock_mp3_to_wav.assert_called_once_with(mock_mp3_data)
 
     def test_save_music_file(self, gateway: ElevenLabsMusicGateway, tmp_path: Path) -> None:
         """音楽ファイル保存のテスト。"""

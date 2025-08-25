@@ -25,6 +25,7 @@ from src.entities.music_generation import (
     MusicFile,
     MusicGenerationRequest,
 )
+from src.utils.audio_converter import AudioConverter
 from src.utils.decorators import async_timer
 from src.utils.rate_limiter import (
     CircuitBreaker,
@@ -73,6 +74,7 @@ class ElevenLabsMusicGateway:
         self._config = config
         self._logger = logging.getLogger(__name__)
         self._client: ElevenLabsClient | None = None
+        self._audio_converter = AudioConverter()
 
         # レート制限の設定
         if rate_limiter:
@@ -115,11 +117,13 @@ class ElevenLabsMusicGateway:
     async def compose_music(
         self,
         request: MusicGenerationRequest,
+        output_format: str = "wav",
     ) -> MusicFile:
         """音楽を生成（シンプル版）。
 
         Args:
             request: 音楽生成リクエスト
+            output_format: 出力フォーマット（"wav" または "mp3"、デフォルト: "wav"）
 
         Returns:
             生成された音楽ファイル
@@ -154,16 +158,24 @@ class ElevenLabsMusicGateway:
             # BytesIOから音声データを取得
             if isinstance(track, BytesIO):
                 track.seek(0)
-                audio_data = track.read()
+                mp3_data = track.read()
             else:
-                audio_data = bytes(track)
+                mp3_data = bytes(track)
+
+            # フォーマット変換
+            if output_format.lower() == "wav":
+                audio_data = self._audio_converter.mp3_to_wav(mp3_data)
+                file_format = "wav"
+            else:
+                audio_data = mp3_data
+                file_format = "mp3"
 
             # MusicFileエンティティを作成
             music_file = MusicFile(
-                file_name=f"generated_music_{request.duration_seconds}s.mp3",
+                file_name=f"generated_music_{request.duration_seconds}s.{file_format}",
                 file_size_bytes=len(audio_data),
                 duration_seconds=request.duration_seconds,
-                format="mp3",
+                format=file_format,
                 data=audio_data,
             )
 
@@ -191,11 +203,13 @@ class ElevenLabsMusicGateway:
     async def compose_with_plan(
         self,
         plan: CompositionPlan,
+        output_format: str = "wav",
     ) -> MusicFile:
         """コンポジションプランを使用して音楽を生成。
 
         Args:
             plan: コンポジションプラン
+            output_format: 出力フォーマット（"wav" または "mp3"、デフォルト: "wav"）
 
         Returns:
             生成された音楽ファイル
@@ -218,9 +232,17 @@ class ElevenLabsMusicGateway:
             # BytesIOから音声データを取得
             if isinstance(track, BytesIO):
                 track.seek(0)
-                audio_data = track.read()
+                mp3_data = track.read()
             else:
-                audio_data = bytes(track)
+                mp3_data = bytes(track)
+
+            # フォーマット変換
+            if output_format.lower() == "wav":
+                audio_data = self._audio_converter.mp3_to_wav(mp3_data)
+                file_format = "wav"
+            else:
+                audio_data = mp3_data
+                file_format = "mp3"
 
             # 総時間を計算
             total_duration_ms = sum(section.get("durationMs", 0) for section in plan.sections)
@@ -228,10 +250,10 @@ class ElevenLabsMusicGateway:
 
             # MusicFileエンティティを作成
             music_file = MusicFile(
-                file_name=f"composed_music_{duration_seconds}s.mp3",
+                file_name=f"composed_music_{duration_seconds}s.{file_format}",
                 file_size_bytes=len(audio_data),
                 duration_seconds=duration_seconds,
-                format="mp3",
+                format=file_format,
                 data=audio_data,
             )
 
