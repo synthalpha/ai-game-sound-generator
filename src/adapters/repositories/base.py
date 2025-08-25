@@ -6,7 +6,9 @@ Repository基底クラスモジュール。
 
 import logging
 from abc import ABC
-from typing import Any
+from typing import Any, Generic, TypeVar
+
+T = TypeVar("T")
 
 
 class BaseRepository(ABC):
@@ -33,19 +35,19 @@ class BaseRepository(ABC):
         self._logger.error(message, exc_info=exception, extra=kwargs)
 
 
-class InMemoryRepository(BaseRepository):
+class InMemoryRepository(BaseRepository, Generic[T]):
     """インメモリRepository基底クラス。"""
 
     def __init__(self) -> None:
         """初期化。"""
         super().__init__()
-        self._storage: dict[str, Any] = {}
+        self._storage: dict[str, T] = {}
 
-    def _get(self, key: str) -> Any | None:
+    def _get(self, key: str) -> T | None:
         """データ取得。"""
         return self._storage.get(key)
 
-    def _set(self, key: str, value: Any) -> None:
+    def _set(self, key: str, value: T) -> None:
         """データ保存。"""
         self._storage[key] = value
 
