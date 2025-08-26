@@ -9,7 +9,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Alpine.js for interactivity -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
     
     <!-- Custom Tailwind Config -->
     <script>
@@ -29,19 +33,6 @@
                         'gradient': 'gradient 8s ease infinite',
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'float': 'float 6s ease-in-out infinite',
-                        'scroll-text': 'scrollText 30s linear infinite',
-                        'fade-in': 'fadeIn 1s ease-out',
-                        'fade-in-up': 'fadeInUp 1s ease-out',
-                        'slide-in-left': 'slideInLeft 0.8s ease-out',
-                        'slide-in-right': 'slideInRight 0.8s ease-out',
-                        'bounce-in': 'bounceIn 1.2s ease-out',
-                        'rotate-in': 'rotateIn 0.8s ease-out',
-                        'zoom-in': 'zoomIn 0.6s ease-out',
-                        'wave': 'wave 2s ease-in-out infinite',
-                        'typing': 'typing 3.5s steps(40, end)',
-                        'blink': 'blink .75s step-end infinite',
-                        'glitch': 'glitch 2s ease-in-out infinite',
-                        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
                     },
                     keyframes: {
                         gradient: {
@@ -57,10 +48,6 @@
                         float: {
                             '0%, 100%': { transform: 'translateY(0px)' },
                             '50%': { transform: 'translateY(-20px)' }
-                        },
-                        scrollText: {
-                            '0%': { transform: 'translateX(0)' },
-                            '100%': { transform: 'translateX(-50%)' }
                         },
                         fadeIn: {
                             '0%': { opacity: '0' },
@@ -85,98 +72,6 @@
                                 opacity: '1',
                                 transform: 'translateX(0)'
                             }
-                        },
-                        slideInRight: {
-                            '0%': { 
-                                opacity: '0',
-                                transform: 'translateX(50px)'
-                            },
-                            '100%': { 
-                                opacity: '1',
-                                transform: 'translateX(0)'
-                            }
-                        },
-                        bounceIn: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'scale3d(0.3, 0.3, 0.3)'
-                            },
-                            '20%': {
-                                transform: 'scale3d(1.1, 1.1, 1.1)'
-                            },
-                            '40%': {
-                                transform: 'scale3d(0.9, 0.9, 0.9)'
-                            },
-                            '60%': {
-                                opacity: '1',
-                                transform: 'scale3d(1.03, 1.03, 1.03)'
-                            },
-                            '80%': {
-                                transform: 'scale3d(0.97, 0.97, 0.97)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'scale3d(1, 1, 1)'
-                            }
-                        },
-                        rotateIn: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'rotate(-200deg)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'rotate(0)'
-                            }
-                        },
-                        zoomIn: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'scale(0)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'scale(1)'
-                            }
-                        },
-                        wave: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '25%': { transform: 'translateY(-10px)' },
-                            '75%': { transform: 'translateY(10px)' }
-                        },
-                        typing: {
-                            '0%': { width: '0' },
-                            '100%': { width: '100%' }
-                        },
-                        blink: {
-                            '0%, 100%': { opacity: '1' },
-                            '50%': { opacity: '0' }
-                        },
-                        glitch: {
-                            '0%, 100%': {
-                                transform: 'translate(0)',
-                                opacity: '1'
-                            },
-                            '20%': {
-                                transform: 'translate(-2px, 2px)',
-                                opacity: '0.8'
-                            },
-                            '40%': {
-                                transform: 'translate(2px, -2px)',
-                                opacity: '0.8'
-                            },
-                            '60%': {
-                                transform: 'translate(-2px, -2px)',
-                                opacity: '0.8'
-                            }
-                        },
-                        pulseGlow: {
-                            '0%, 100%': {
-                                boxShadow: '0 0 20px rgba(139, 92, 246, 0.5)'
-                            },
-                            '50%': {
-                                boxShadow: '0 0 40px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.4)'
-                            }
                         }
                     },
                     backdropBlur: {
@@ -187,159 +82,6 @@
         }
     </script>
     
-    <!-- Custom Styles -->
-    <style>
-        /* グラスモーフィズム効果 */
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        /* グラデーション背景 */
-        .gradient-bg {
-            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e1b4b, #0f172a);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-        }
-        
-        /* ネオンテキスト効果 */
-        .neon-text {
-            text-shadow: 0 0 10px rgba(139, 92, 246, 0.5),
-                         0 0 20px rgba(139, 92, 246, 0.3),
-                         0 0 30px rgba(139, 92, 246, 0.2);
-        }
-        
-        /* カスタムスクロールバー */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: rgba(139, 92, 246, 0.5);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(139, 92, 246, 0.7);
-        }
-        
-        /* スクロールトリガーアニメーション */
-        .feature-card {
-            opacity: 1;
-            animation: fadeInUp 0.8s ease-out forwards;
-        }
-        
-        .step-item {
-            opacity: 1;
-            animation: slideInLeft 0.8s ease-out forwards;
-        }
-        
-        /* アニメーション初期状態 */
-        .animate-on-scroll {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s ease-out;
-        }
-        
-        .animate-on-scroll.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* ホバーエフェクト */
-        .hover-lift {
-            transition: transform 0.3s ease;
-        }
-        
-        .hover-lift:hover {
-            transform: translateY(-5px);
-        }
-        
-        /* グロー効果 */
-        .glow {
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
-        }
-        
-        /* パララックス効果 */
-        .parallax {
-            will-change: transform;
-        }
-        
-        /* ステップ間のライン - 削除（不要） */
-        
-        /* タイピングエフェクト */
-        .typewriter {
-            overflow: hidden;
-            border-right: .15em solid rgba(139, 92, 246, 0.7);
-            white-space: nowrap;
-            margin: 0 auto;
-            animation: 
-                typing 3.5s steps(40, end),
-                blink .75s step-end infinite;
-        }
-        
-        /* 波形アニメーション */
-        .wave-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100px;
-            overflow: hidden;
-        }
-        
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent,
-                rgba(139, 92, 246, 0.1),
-                transparent);
-            animation: waveMove 10s linear infinite;
-        }
-        
-        @keyframes waveMove {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        
-        /* パーティクルエフェクト */
-        .particle {
-            position: fixed;
-            pointer-events: none;
-            opacity: 0;
-            animation: particleFloat 10s linear infinite;
-        }
-        
-        @keyframes particleFloat {
-            0% {
-                opacity: 0;
-                transform: translateY(100vh) scale(0);
-            }
-            10% {
-                opacity: 1;
-                transform: translateY(90vh) scale(1);
-            }
-            90% {
-                opacity: 1;
-                transform: translateY(10vh) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(0) scale(0);
-            }
-        }
-    </style>
     
     {% block head %}{% endblock %}
 </head>
