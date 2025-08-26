@@ -9,7 +9,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Alpine.js for interactivity -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
     
     <!-- Custom Tailwind Config -->
     <script>
@@ -44,6 +48,30 @@
                         float: {
                             '0%, 100%': { transform: 'translateY(0px)' },
                             '50%': { transform: 'translateY(-20px)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        fadeInUp: {
+                            '0%': { 
+                                opacity: '0',
+                                transform: 'translateY(30px)'
+                            },
+                            '100%': { 
+                                opacity: '1',
+                                transform: 'translateY(0)'
+                            }
+                        },
+                        slideInLeft: {
+                            '0%': { 
+                                opacity: '0',
+                                transform: 'translateX(-50px)'
+                            },
+                            '100%': { 
+                                opacity: '1',
+                                transform: 'translateX(0)'
+                            }
                         }
                     },
                     backdropBlur: {
@@ -54,49 +82,6 @@
         }
     </script>
     
-    <!-- Custom Styles -->
-    <style>
-        /* グラスモーフィズム効果 */
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        /* グラデーション背景 */
-        .gradient-bg {
-            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e1b4b, #0f172a);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-        }
-        
-        /* ネオンテキスト効果 */
-        .neon-text {
-            text-shadow: 0 0 10px rgba(139, 92, 246, 0.5),
-                         0 0 20px rgba(139, 92, 246, 0.3),
-                         0 0 30px rgba(139, 92, 246, 0.2);
-        }
-        
-        /* カスタムスクロールバー */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: rgba(139, 92, 246, 0.5);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(139, 92, 246, 0.7);
-        }
-    </style>
     
     {% block head %}{% endblock %}
 </head>
