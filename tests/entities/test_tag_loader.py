@@ -110,12 +110,12 @@ class TestTagDefinitionLoader:
 
     def test_search_tags_combined(self, loader: TagDefinitionLoader) -> None:
         """複合検索のテスト。"""
-        # "街"をsceneカテゴリで検索
+        # "街"をsceneカテゴリで検索（フィールドタグに統合されている）
         results = loader.search_tags(keyword="街", category="scene")
 
         assert len(results) == 1
-        assert results[0].id == "scene_town"
-        assert results[0].display_name == "街"
+        assert results[0].id == "scene_field"
+        assert results[0].display_name == "フィールド"
 
     def test_tag_to_entity_conversion(self, loader: TagDefinitionLoader) -> None:
         """エンティティ変換のテスト。"""
