@@ -244,13 +244,13 @@
       "keywords": ["brave", "powerful", "triumphant"]
     },
     {
-      "id": "scene_title",
+      "id": "scene_opening",
       "category": "scene",
-      "value": "title",
-      "displayName": "タイトル",
-      "displayNameEn": "Title",
-      "description": "タイトル画面用の音楽",
-      "keywords": ["main theme", "opening", "introduction"]
+      "value": "opening",
+      "displayName": "オープニング",
+      "displayNameEn": "Opening",
+      "description": "オープニング・タイトル画面用の音楽",
+      "keywords": ["main theme", "title", "introduction", "start"]
     },
     {
       "id": "scene_menu",
@@ -276,8 +276,8 @@
       "value": "boss",
       "displayName": "ボス戦",
       "displayNameEn": "Boss Battle",
-      "description": "ボス戦用の音楽",
-      "keywords": ["climactic", "intense", "final battle"]
+      "description": "ボス戦・クライマックスシーン用の音楽",
+      "keywords": ["climactic", "intense", "final battle", "climax"]
     },
     {
       "id": "scene_exploration",
@@ -294,8 +294,8 @@
       "value": "victory",
       "displayName": "勝利",
       "displayNameEn": "Victory",
-      "description": "勝利シーン用の音楽",
-      "keywords": ["triumph", "celebration", "success"]
+      "description": "勝利・クリアシーン用の音楽",
+      "keywords": ["triumph", "celebration", "success", "clear"]
     },
     {
       "id": "scene_defeat",
@@ -303,8 +303,17 @@
       "value": "defeat",
       "displayName": "敗北",
       "displayNameEn": "Defeat",
-      "description": "敗北シーン用の音楽",
+      "description": "敗北・ゲームオーバーシーン用の音楽",
       "keywords": ["game over", "loss", "failure"]
+    },
+    {
+      "id": "scene_field",
+      "category": "scene",
+      "value": "field",
+      "displayName": "フィールド",
+      "displayNameEn": "Field",
+      "description": "フィールド・マップ・街・ステージ用の音楽",
+      "keywords": ["map", "stage", "world", "area", "town", "city"]
     },
     {
       "id": "scene_shop",
@@ -316,22 +325,31 @@
       "keywords": ["market", "merchant", "trading"]
     },
     {
-      "id": "scene_town",
-      "category": "scene",
-      "value": "town",
-      "displayName": "街",
-      "displayNameEn": "Town",
-      "description": "街・村用の音楽",
-      "keywords": ["village", "city", "peaceful"]
-    },
-    {
       "id": "scene_dungeon",
       "category": "scene",
       "value": "dungeon",
       "displayName": "ダンジョン",
       "displayNameEn": "Dungeon",
-      "description": "ダンジョン用の音楽",
-      "keywords": ["cave", "underground", "dangerous"]
+      "description": "ダンジョン・洞窟・危険エリア用の音楽",
+      "keywords": ["cave", "underground", "dangerous", "dark"]
+    },
+    {
+      "id": "scene_ending",
+      "category": "scene",
+      "value": "ending",
+      "displayName": "エンディング",
+      "displayNameEn": "Ending",
+      "description": "エンディング・スタッフロール用の音楽",
+      "keywords": ["credits", "finale", "conclusion", "staff roll"]
+    },
+    {
+      "id": "scene_daily",
+      "category": "scene",
+      "value": "daily",
+      "displayName": "日常",
+      "displayNameEn": "Daily",
+      "description": "日常シーン・会話シーン用の音楽",
+      "keywords": ["conversation", "dialogue", "peaceful", "casual"]
     },
     {
       "id": "instrument_orchestra",
