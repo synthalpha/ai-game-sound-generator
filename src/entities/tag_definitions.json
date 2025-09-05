@@ -136,6 +136,33 @@
       "keywords": ["exploration", "discovery", "mysterious"]
     },
     {
+      "id": "genre_horror",
+      "category": "genre",
+      "value": "horror",
+      "displayName": "ホラー",
+      "displayNameEn": "Horror",
+      "description": "ホラーゲーム向けの音楽",
+      "keywords": ["scary", "dark", "suspense", "creepy"]
+    },
+    {
+      "id": "genre_casual",
+      "category": "genre",
+      "value": "casual",
+      "displayName": "カジュアル",
+      "displayNameEn": "Casual",
+      "description": "カジュアル・短時間プレイ向けの音楽",
+      "keywords": ["light", "fun", "simple", "upbeat"]
+    },
+    {
+      "id": "genre_party",
+      "category": "genre",
+      "value": "party",
+      "displayName": "パーティー",
+      "displayNameEn": "Party",
+      "description": "協力・対戦・ソーシャル要素を含むゲーム向けの音楽",
+      "keywords": ["multiplayer", "social", "fun", "competitive"]
+    },
+    {
       "id": "mood_bright",
       "category": "mood",
       "value": "bright",
@@ -197,6 +224,15 @@
       "displayNameEn": "Mysterious",
       "description": "神秘的で不思議な雰囲気",
       "keywords": ["enigmatic", "mystical", "ethereal"]
+    },
+    {
+      "id": "mood_romantic",
+      "category": "mood",
+      "value": "romantic",
+      "displayName": "ロマンティック",
+      "displayNameEn": "Romantic",
+      "description": "ロマンティックで感動的な雰囲気",
+      "keywords": ["love", "emotional", "tender", "passionate"]
     },
     {
       "id": "mood_heroic",
