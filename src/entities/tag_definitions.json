@@ -157,8 +157,8 @@
       "id": "genre_party",
       "category": "genre",
       "value": "party",
-      "displayName": "パーティーゲーム",
-      "displayNameEn": "Party Game",
+      "displayName": "パーティー",
+      "displayNameEn": "Party",
       "description": "協力・対戦・ソーシャル要素を含むゲーム向けの音楽",
       "keywords": ["multiplayer", "social", "fun", "competitive"]
     },
