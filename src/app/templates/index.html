@@ -173,22 +173,25 @@
             margin-bottom: 20px;
         }
         
+        .tag-label-header {
+            display: inline-block;
+        }
+        
         .tag-label-en {
             font-family: "pragmatica-extended", sans-serif;
-            font-size: 32px;
-            font-weight: 400;
-            letter-spacing: 0;
-            line-height: 1;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            line-height: 1.4;
         }
         
         .tag-label-ja {
-            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "游ゴシック Medium", "Meiryo", sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 0;
-            line-height: 1.5;
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 0.04em;
+            color: #666;
+            margin-top: 2px;
         }
         
         
@@ -239,10 +242,9 @@
         /* Duration section uses tag-section styles */
         
         .duration-display {
-            font-size: 16px;
+            font-size: 20px;
             font-weight: 600;
             letter-spacing: 0.04em;
-            margin-left: auto;
         }
         
         .slider {
@@ -455,8 +457,10 @@
                 <!-- ジャンル -->
                 <div class="tag-section">
                     <div class="tag-label">
-                        <div class="tag-label-en">GENRE</div>
-                        <div class="tag-label-ja">ジャンル</div>
+                        <div>
+                            <div class="tag-label-en">GENRE</div>
+                            <div class="tag-label-ja">ジャンル</div>
+                        </div>
                     </div>
                     <div class="tag-grid">
                         <template x-for="genre in genres">
@@ -474,8 +478,10 @@
                 <!-- ムード -->
                 <div class="tag-section">
                     <div class="tag-label">
-                        <div class="tag-label-en">MOOD</div>
-                        <div class="tag-label-ja">ムード</div>
+                        <div>
+                            <div class="tag-label-en">MOOD</div>
+                            <div class="tag-label-ja">ムード</div>
+                        </div>
                     </div>
                     <div class="tag-grid">
                         <template x-for="mood in moods">
@@ -493,8 +499,10 @@
                 <!-- シーン -->
                 <div class="tag-section">
                     <div class="tag-label">
-                        <div class="tag-label-en">SCENE</div>
-                        <div class="tag-label-ja">シーン</div>
+                        <div>
+                            <div class="tag-label-en">SCENE</div>
+                            <div class="tag-label-ja">シーン</div>
+                        </div>
                     </div>
                     <div class="tag-grid">
                         <template x-for="scene in scenes">
@@ -550,12 +558,14 @@
                 </div>
                 
                 <!-- 音楽の長さ -->
-                <div class="duration-section">
-                    <div class="tag-label">
-                        <div class="tag-label-en">DURATION</div>
-                        <div class="tag-label-ja">音楽の長さ</div>
+                <div class="tag-section">
+                    <div class="tag-label" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="tag-label-en">DURATION</div>
+                            <div class="tag-label-ja">音楽の長さ</div>
+                        </div>
+                        <div class="duration-display" x-text="formatTime(duration)"></div>
                     </div>
-                    <div class="duration-display" x-text="formatTime(duration)"></div>
                     <input 
                         type="range" 
                         x-model="duration" 
