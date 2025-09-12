@@ -33,12 +33,26 @@
             height: 100vh;
         }
         
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+                height: auto;
+            }
+        }
+        
         /* レイアウト */
         .container {
             height: 100vh;
             background: #fff;
             display: flex;
             flex-direction: column;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                height: auto;
+                min-height: 100vh;
+            }
         }
         
         /* ヘッダー */
@@ -62,6 +76,7 @@
             font-weight: 500;
             letter-spacing: 0;
             line-height: 1.4;
+            white-space: nowrap;
         }
         
         .header-nav {
@@ -80,6 +95,7 @@
             position: relative;
             transition: none;
             opacity: 0.6;
+            white-space: nowrap;
         }
         
         .nav-link:hover {
@@ -426,6 +442,140 @@
             font-size: 13px;
             color: #666;
             line-height: 1.8;
+        }
+        /* レスポンシブ対応 */
+        @media (max-width: 1024px) {
+            .header {
+                padding: 0 40px;
+            }
+            
+            .generation-section {
+                padding: 30px 40px;
+            }
+            
+            .audio-container {
+                padding: 30px 40px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 20px;
+            }
+            
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .header-nav {
+                gap: 30px;
+            }
+            
+            .nav-link {
+                font-size: 13px;
+            }
+            
+            .main-content {
+                height: auto;
+                min-height: calc(100vh - 80px);
+                overflow-y: auto;
+            }
+            
+            .generation-section {
+                padding: 20px;
+                flex: none;
+                height: auto;
+            }
+            
+            .result-section-container {
+                flex: none;
+                height: auto;
+                min-height: 300px;
+            }
+            
+            .tag-row {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .tag-section {
+                width: 100%;
+                padding: 0 !important;
+            }
+            
+            .tag-section:not(:last-child)::after {
+                display: none;
+            }
+            
+            .tag-section:not(:last-child) {
+                padding-bottom: 30px !important;
+                border-bottom: 1px solid #d8d8d8;
+            }
+            
+            .tag-grid {
+                justify-content: flex-start;
+            }
+            
+            .generate-button {
+                width: 100%;
+                padding: 16px 40px;
+            }
+            
+            .audio-container {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+            
+            .action-button {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 16px;
+            }
+            
+            .header-nav {
+                gap: 20px;
+            }
+            
+            .nav-link {
+                font-size: 12px;
+                padding: 6px 0;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+            
+            .tag-label-en {
+                font-size: 14px;
+            }
+            
+            .tag-label-ja {
+                font-size: 11px;
+            }
+            
+            .tag-button {
+                font-size: 13px;
+                padding: 6px 16px;
+            }
+            
+            .duration-display {
+                font-size: 18px;
+            }
+            
+            .generate-button {
+                font-size: 14px;
+                padding: 14px 30px;
+            }
         }
     </style>
 </head>
