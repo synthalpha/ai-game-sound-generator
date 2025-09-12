@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン - AI Game Sound Generator</title>
+    
+    <!-- Adobe Fonts -->
+    <link rel="stylesheet" href="https://use.typekit.net/sys6avf.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "pragmatica-extended", "objektiv-mk1", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "游ゴシック Medium", "Meiryo", sans-serif;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 1.8;
+            letter-spacing: 0.04em;
+            color: #000;
+            background: #fff;
+            font-feature-settings: "palt";
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .login-title {
+            font-family: "pragmatica-extended", sans-serif;
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            line-height: 1.4;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 16px;
+            border: 1px solid #d8d8d8;
+            border-radius: 8px;
+            background: #fff;
+            font-family: inherit;
+            letter-spacing: 0.04em;
+            transition: none;
+        }
+        
+        .password-input:focus {
+            outline: none;
+            border-color: #000;
+        }
+        
+        .password-input::placeholder {
+            color: #999;
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 16px 40px;
+            background: #000;
+            color: #fff;
+            border: 1px solid #000;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: none;
+            font-family: inherit;
+        }
+        
+        .login-button:hover {
+            background: #fff;
+            color: #000;
+        }
+        
+        .login-button:disabled {
+            background: #e5e5e5;
+            color: #999;
+            border-color: #e5e5e5;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .error-message {
+            color: #ff3333;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .event-info {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid #d8d8d8;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 40px 20px;
+            }
+            
+            .login-title {
+                font-size: 20px;
+            }
+            
+            .password-input {
+                font-size: 14px;
+                padding: 14px 16px;
+            }
+            
+            .login-button {
+                font-size: 14px;
+                padding: 14px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1 class="login-title">AI Game Sound Generator</h1>
+        
+        <form class="login-form" method="POST" action="/login">
+            <input 
+                type="password" 
+                name="password" 
+                class="password-input" 
+                placeholder="パスワードを入力"
+                required
+                autofocus>
+            
+            <button type="submit" class="login-button">
+                ログイン
+            </button>
+            
+            {% if error %}
+            <div class="error-message show">
+                パスワードが正しくありません
+            </div>
+            {% endif %}
+        </form>
+        
+        <div class="event-info">
+            Tokyo Game Show 2025<br>
+            Demo Version
+        </div>
+    </div>
+</body>
+</html>
