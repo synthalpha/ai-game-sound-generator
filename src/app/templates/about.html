@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特徴 - AI Game Sound Generator</title>
+    
+    <!-- Adobe Fonts -->
+    <link rel="stylesheet" href="https://use.typekit.net/sys6avf.css">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "pragmatica-extended", "objektiv-mk1", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "游ゴシック Medium", "Meiryo", sans-serif;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 24px;
+            letter-spacing: 0.1em;
+            color: #000;
+            background: #fff;
+            font-feature-settings: "palt";
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* ヘッダー */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: #fff;
+            border-bottom: 1px solid #d8d8d8;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            padding: 0 60px;
+        }
+        
+        .header h1 {
+            font-family: "pragmatica-extended", sans-serif;
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: 0;
+            line-height: 1.4;
+        }
+        
+        .header-nav {
+            display: flex;
+            gap: 50px;
+            margin-left: auto;
+        }
+        
+        .nav-link {
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            text-decoration: none;
+            letter-spacing: 0.08em;
+            padding: 8px 0;
+            position: relative;
+            transition: none;
+            opacity: 0.6;
+        }
+        
+        .nav-link:hover {
+            opacity: 1;
+        }
+        
+        .nav-link.active {
+            opacity: 1;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #000;
+        }
+        
+        /* メインコンテンツ */
+        .main-content {
+            margin-top: 80px;
+            padding: 80px 60px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* ヒーローセクション */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 100px;
+        }
+        
+        .hero-title {
+            font-family: "pragmatica-extended", sans-serif;
+            font-size: 48px;
+            font-weight: 400;
+            letter-spacing: 0;
+            line-height: 1.2;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+        
+        .hero-subtitle {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #666;
+        }
+        
+        /* 特徴カード */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 60px;
+            margin-bottom: 100px;
+        }
+        
+        .feature-card {
+            text-align: center;
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feature-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: #000;
+            stroke-width: 1.5;
+        }
+        
+        .feature-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: 0.04em;
+        }
+        
+        .feature-description {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #666;
+        }
+        
+        /* AIエンジンセクション */
+        .engine-section {
+            background: #fafafa;
+            padding: 80px;
+            margin: 0 -60px;
+            text-align: center;
+        }
+        
+        .engine-title {
+            font-family: "pragmatica-extended", sans-serif;
+            font-size: 36px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            line-height: 1.4;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+        
+        .engine-subtitle {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .engine-description {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* CTAセクション */
+        .cta-section {
+            text-align: center;
+            padding: 80px 0;
+        }
+        
+        .cta-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 18px 60px;
+            background: #000;
+            color: #fff;
+            border: 1px solid #000;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+            transition: none;
+        }
+        
+        .cta-button:hover {
+            background: #fff;
+            color: #000;
+        }
+        
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .hero-title {
+                font-size: 32px;
+            }
+            
+            .engine-section {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI GAME SOUND GENERATOR</h1>
+        <nav class="header-nav">
+            <a href="/" class="nav-link">トラック生成</a>
+            <a href="/about" class="nav-link active">特徴</a>
+        </nav>
+    </div>
+    
+    <div class="main-content">
+        <!-- ヒーローセクション -->
+        <section class="hero-section">
+            <h2 class="hero-title">AI GAME SOUND GENERATOR</h2>
+            <p class="hero-subtitle">
+                ゲーム開発に特化したAI音楽生成ツール<br>
+                タグを選ぶだけで簡単にゲームBGMを作成
+            </p>
+        </section>
+        
+        <!-- 特徴カード -->
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="gamepad-2"></i>
+                </div>
+                <h3 class="feature-title">ゲーム特化</h3>
+                <p class="feature-description">
+                    RPG、アクション、パズルなど<br>
+                    様々なゲームジャンルに対応したタグを用意
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="mouse-pointer-click"></i>
+                </div>
+                <h3 class="feature-title">シンプル操作</h3>
+                <p class="feature-description">
+                    ジャンル、ムード、シーンのタグを<br>
+                    選ぶだけの簡単操作
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="timer"></i>
+                </div>
+                <h3 class="feature-title">長さ調整可能</h3>
+                <p class="feature-description">
+                    30秒から3分まで<br>
+                    必要な長さに合わせて生成
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="sliders"></i>
+                </div>
+                <h3 class="feature-title">カスタマイズ可能</h3>
+                <p class="feature-description">
+                    ジャンル、ムード、テンポを<br>
+                    自由に組み合わせて調整
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <h3 class="feature-title">高品質AI</h3>
+                <p class="feature-description">
+                    最新のAI技術を活用した<br>
+                    高品質な音楽生成
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="zap"></i>
+                </div>
+                <h3 class="feature-title">開発効率化</h3>
+                <p class="feature-description">
+                    音楽制作の時間とコストを<br>
+                    大幅に削減
+                </p>
+            </div>
+        </section>
+        
+        <!-- AIエンジンセクション -->
+        <section class="engine-section">
+            <h3 class="engine-title">HOW IT WORKS</h3>
+            <h4 class="engine-subtitle">
+                シンプルな3ステップ
+            </h4>
+            <div class="engine-description">
+                <div style="margin-bottom: 30px;">
+                    <strong>STEP 1</strong><br>
+                    ゲームの雰囲気に合わせたタグを選択
+                </div>
+                <div style="margin-bottom: 30px;">
+                    <strong>STEP 2</strong><br>
+                    シーンに必要な長さをスライダーで調整
+                </div>
+                <div style="margin-bottom: 30px;">
+                    <strong>STEP 3</strong><br>
+                    生成ボタンを押してオリジナル音楽を取得
+                </div>
+                <p style="margin-top: 40px; color: #666;">
+                    選択したタグの組み合わせから、AIが最適な音楽を生成。<br>
+                    プロトタイプから本番まで、すぐに使えるクオリティを提供します。
+                </p>
+            </div>
+        </section>
+        
+        <!-- CTA -->
+        <section class="cta-section">
+            <h3 class="cta-title">今すぐ試してみる</h3>
+            <a href="/" class="cta-button">トラック生成を開始</a>
+        </section>
+    </div>
+    <script>
+        // Lucideアイコンをレンダリング
+        lucide.createIcons();
+    </script>
+</body>
+</html>
