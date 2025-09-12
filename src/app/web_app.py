@@ -46,6 +46,18 @@ async def index(request: Request):
     )
 
 
+@app.get("/about", response_class=HTMLResponse)
+async def about(request: Request):
+    """特徴ページ。"""
+    return templates.TemplateResponse(
+        "about.html",
+        {
+            "request": request,
+            "title": "特徴 - AI Game Sound Generator",
+        },
+    )
+
+
 @app.get("/health")
 async def health_check():
     """ヘルスチェックエンドポイント。"""
