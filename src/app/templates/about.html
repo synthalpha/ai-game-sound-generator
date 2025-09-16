@@ -45,7 +45,18 @@
             align-items: center;
             padding: 0 60px;
         }
-        
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            height: 40px;
+            width: auto;
+        }
+
         .header h1 {
             font-family: "pragmatica-extended", sans-serif;
             font-size: 18px;
@@ -294,10 +305,13 @@
 </head>
 <body>
     <div class="header">
-        <h1>
-            <span class="header-title-main">AI GAME SOUND</span>
-            <span class="header-title-sub">GENERATOR</span>
-        </h1>
+        <div class="header-content">
+            <img src="/static/images/fimmigrm_logo_2025_01.svg" alt="Fimmgrm Logo" class="header-logo">
+            <h1>
+                <span class="header-title-main">AI GAME SOUND</span>
+                <span class="header-title-sub">GENERATOR</span>
+            </h1>
+        </div>
         <nav class="header-nav">
             <a href="/" class="nav-link">トラック生成</a>
             <a href="/about" class="nav-link active">特徴</a>

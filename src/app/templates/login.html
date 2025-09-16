@@ -39,6 +39,15 @@
             text-align: center;
         }
         
+        .logo-container {
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            height: 60px;
+            width: auto;
+        }
+
         .login-title {
             font-family: "pragmatica-extended", sans-serif;
             font-size: 24px;
@@ -147,6 +156,9 @@
 </head>
 <body>
     <div class="login-container">
+        <div class="logo-container">
+            <img src="/static/images/fimmigrm_logo_2025_01.svg" alt="Fimmgrm Logo" class="logo">
+        </div>
         <h1 class="login-title">AI Game Sound Generator</h1>
         
         <form class="login-form" method="POST" action="/login">
