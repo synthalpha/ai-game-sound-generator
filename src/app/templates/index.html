@@ -102,6 +102,28 @@
             display: flex;
             gap: 50px;
             margin-left: auto;
+            align-items: center;
+        }
+
+        .logout-button {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            text-decoration: none;
+            padding: 8px 20px;
+            border: 1px solid #d8d8d8;
+            border-radius: 20px;
+            background: transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+            letter-spacing: 0.08em;
+            margin-left: 20px;
+        }
+
+        .logout-button:hover {
+            background: #f5f5f5;
+            color: #000;
+            border-color: #000;
         }
         
         .nav-link {
@@ -620,6 +642,7 @@
         <nav class="header-nav">
             <a href="/" class="nav-link active">トラック生成</a>
             <a href="/about" class="nav-link">特徴</a>
+            <a href="/logout" class="logout-button">ログアウト</a>
         </nav>
     </div>
     
