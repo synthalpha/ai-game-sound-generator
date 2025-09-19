@@ -904,7 +904,7 @@
                                 @click="toggleTag('instrument', instrument.name)"
                                 :class="{'selected': selectedTags.instrument.includes(instrument.name)}"
                                 class="tag-button"
-                                x-text="instrument.name_ja || instrument.name">
+                                x-text="currentLang === 'ja' ? (instrument.name_ja || instrument.name) : instrument.name">
                             </button>
                         </template>
                     </div>
@@ -923,7 +923,7 @@
                                 :disabled="selectedTags.tempo.length > 0 && !selectedTags.tempo.includes(tempo.name)"
                                 :class="{'selected': selectedTags.tempo.includes(tempo.name)}"
                                 class="tag-button"
-                                x-text="tempo.name_ja || tempo.name">
+                                x-text="currentLang === 'ja' ? (tempo.name_ja || tempo.name) : tempo.name">
                             </button>
                         </template>
                     </div>
