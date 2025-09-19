@@ -6,10 +6,13 @@ FastAPI APIルート定義。
 
 import base64
 import os
+import uuid
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from src.adapters.gateways.elevenlabs import ElevenLabs
@@ -24,6 +27,24 @@ from src.usecases.prompt_generation.generate_prompt import GeneratePromptUseCase
 load_dotenv()
 
 router = APIRouter(prefix="/api")
+
+# ファイル保存ディレクトリ
+DOWNLOAD_DIR = Path("/tmp/music_downloads")
+DOWNLOAD_DIR.mkdir(exist_ok=True)
+
+# 現在のダウンロードファイル（1つのみ保持）
+current_download_file = {"id": None, "path": None, "filename": None}
+
+
+def cleanup_old_files():
+    """古いファイルを削除。"""
+    global current_download_file
+    if current_download_file["path"] and Path(current_download_file["path"]).exists():
+        try:
+            Path(current_download_file["path"]).unlink()
+        except Exception as e:
+            print(f"ファイル削除エラー: {e}")
+    current_download_file = {"id": None, "path": None, "filename": None}
 
 
 class GenerateMusicRequest(BaseModel):
@@ -45,6 +66,7 @@ class GenerateMusicResponse(BaseModel):
     success: bool
     prompt: str
     audio_data: str | None = None  # Base64エンコードされた音声データ
+    download_id: str | None = None  # ダウンロード用ID
     file_name: str | None = None
     file_size_bytes: int | None = None
     duration_seconds: int | None = None
@@ -128,12 +150,30 @@ async def generate_music(request: GenerateMusicRequest) -> GenerateMusicResponse
             base64.b64encode(music_file.data).decode("utf-8") if music_file.data else None
         )
 
+        # 古いファイルを削除
+        cleanup_old_files()
+
+        # 新しいファイルを保存
+        download_id = str(uuid.uuid4())
+        if music_file.data:
+            file_path = DOWNLOAD_DIR / f"{download_id}.mp3"
+            file_path.write_bytes(music_file.data)
+
+            # 現在のダウンロード情報を更新
+            global current_download_file
+            current_download_file = {
+                "id": download_id,
+                "path": str(file_path),
+                "filename": music_file.file_name,
+            }
+
         generation_time = time.time() - start_time
 
         return GenerateMusicResponse(
             success=True,
             prompt=prompt.text,
             audio_data=audio_data_base64,
+            download_id=download_id,
             file_name=music_file.file_name,
             file_size_bytes=music_file.file_size_bytes,
             duration_seconds=music_file.duration_seconds,
@@ -148,6 +188,34 @@ async def generate_music(request: GenerateMusicRequest) -> GenerateMusicResponse
             error_message=str(e),
             generation_time=generation_time,
         )
+
+
+@router.get("/download/{download_id}")
+async def download_music(download_id: str):
+    """生成した音楽ファイルをダウンロード。"""
+    global current_download_file
+
+    # ダウンロードIDが一致するか確認
+    if not current_download_file["id"] or current_download_file["id"] != download_id:
+        raise HTTPException(status_code=404, detail="ファイルが見つかりません")
+
+    # ファイルが存在するか確認
+    file_path = Path(current_download_file["path"])
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="ファイルが見つかりません")
+
+    return FileResponse(
+        path=file_path,
+        filename=current_download_file["filename"],
+        media_type="audio/mpeg",
+    )
+
+
+@router.delete("/cleanup")
+async def cleanup_files():
+    """ファイルをクリーンアップ。"""
+    cleanup_old_files()
+    return {"status": "cleaned"}
 
 
 @router.get("/tags")
