@@ -175,6 +175,7 @@
             z-index: 100;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 60px;
         }
 
@@ -208,8 +209,7 @@
         
         .header-nav {
             display: flex;
-            gap: 50px;
-            margin-left: auto;
+            gap: 30px;
             align-items: center;
         }
 
@@ -226,12 +226,48 @@
             cursor: pointer;
             letter-spacing: 0.08em;
             margin-left: 20px;
+            min-width: 100px;
+            text-align: center;
+            display: inline-block;
         }
 
         .logout-button:hover {
             background: #f5f5f5;
             color: #000;
             border-color: #000;
+        }
+
+        /* 言語切り替えボタン */
+        .language-toggle {
+            display: flex;
+            align-items: center;
+            background: #f5f5f5;
+            border-radius: 20px;
+            padding: 4px;
+            margin-left: 30px;
+        }
+
+        .language-btn {
+            padding: 6px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            border-radius: 16px;
+            transition: all 0.2s;
+            letter-spacing: 0.05em;
+        }
+
+        .language-btn.active {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .language-btn:hover:not(.active) {
+            color: #000;
         }
         
         .nav-link {
@@ -240,11 +276,14 @@
             color: #000;
             text-decoration: none;
             letter-spacing: 0.08em;
-            padding: 8px 0;
+            padding: 8px 12px;
             position: relative;
             transition: none;
             opacity: 0.6;
             white-space: nowrap;
+            min-width: 100px;
+            text-align: center;
+            display: inline-block;
         }
         
         .nav-link:hover {
@@ -755,13 +794,24 @@
             </h1>
         </div>
         <nav class="header-nav">
-            <a href="/" class="nav-link active">トラック生成</a>
-            <a href="/about" class="nav-link">特徴</a>
-            <a href="/logout" class="logout-button">ログアウト</a>
+            <a href="/" class="nav-link active" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+               x-text="lang === 'ja' ? 'トラック生成' : 'Track Generation'"
+               @language-changed.window="lang = $event.detail">トラック生成</a>
+            <a href="/about" class="nav-link" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+               x-text="lang === 'ja' ? '特徴' : 'Features'"
+               @language-changed.window="lang = $event.detail">特徴</a>
+            <a href="/logout" class="logout-button" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+               x-text="lang === 'ja' ? 'ログアウト' : 'Logout'"
+               @language-changed.window="lang = $event.detail">ログアウト</a>
+            <div class="language-toggle" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+                 x-init="$watch('lang', value => { localStorage.setItem('language', value); window.dispatchEvent(new CustomEvent('language-changed', { detail: value })); })">
+                <button @click="lang = 'ja'" :class="{'active': lang === 'ja'}" class="language-btn">JP</button>
+                <button @click="lang = 'en'" :class="{'active': lang === 'en'}" class="language-btn">EN</button>
+            </div>
         </nav>
     </div>
     
-    <div class="main-content" x-data="musicGenerator()" x-init="init()">
+    <div class="main-content" x-data="musicGenerator()" x-init="init()" @language-changed.window="currentLang = $event.detail">
         <!-- 生成セクション -->
         <div class="generation-section">
             <h2 class="section-title">音楽生成設定</h2>
@@ -791,7 +841,7 @@
                                 :disabled="selectedTags.genre.length > 0 && !selectedTags.genre.includes(genre.name)"
                                 :class="{'selected': selectedTags.genre.includes(genre.name)}"
                                 class="tag-button"
-                                x-text="genre.name_ja || genre.name">
+                                x-text="currentLang === 'ja' ? (genre.name_ja || genre.name) : genre.name">
                             </button>
                         </template>
                     </div>
@@ -802,7 +852,7 @@
                     <div class="tag-label">
                         <div>
                             <div class="tag-label-en">MOOD</div>
-                            <div class="tag-label-ja">ムード</div>
+                            <div class="tag-label-ja" x-text="currentLang === 'ja' ? 'ムード' : ''" x-show="currentLang === 'ja'">ムード</div>
                         </div>
                     </div>
                     <div class="tag-grid">
@@ -812,7 +862,7 @@
                                 :disabled="selectedTags.mood.length > 0 && !selectedTags.mood.includes(mood.name)"
                                 :class="{'selected': selectedTags.mood.includes(mood.name)}"
                                 class="tag-button"
-                                x-text="mood.name_ja || mood.name">
+                                x-text="currentLang === 'ja' ? (mood.name_ja || mood.name) : mood.name">
                             </button>
                         </template>
                     </div>
@@ -823,7 +873,7 @@
                     <div class="tag-label">
                         <div>
                             <div class="tag-label-en">SCENE</div>
-                            <div class="tag-label-ja">シーン</div>
+                            <div class="tag-label-ja" x-text="currentLang === 'ja' ? 'シーン' : ''" x-show="currentLang === 'ja'">シーン</div>
                         </div>
                     </div>
                     <div class="tag-grid">
@@ -833,7 +883,7 @@
                                 :disabled="selectedTags.scene.length >= 2 && !selectedTags.scene.includes(scene.name)"
                                 :class="{'selected': selectedTags.scene.includes(scene.name)}"
                                 class="tag-button"
-                                x-text="scene.name_ja || scene.name">
+                                x-text="currentLang === 'ja' ? (scene.name_ja || scene.name) : scene.name">
                             </button>
                         </template>
                     </div>
@@ -846,7 +896,7 @@
                 <div class="tag-section" x-show="instruments.length > 0">
                     <div class="tag-label">
                         <div class="tag-label-en">INSTRUMENT</div>
-                        <div class="tag-label-ja">楽器</div>
+                        <div class="tag-label-ja" x-text="currentLang === 'ja' ? '楽器' : ''" x-show="currentLang === 'ja'">楽器</div>
                     </div>
                     <div class="tag-grid">
                         <template x-for="instrument in instruments">
@@ -854,7 +904,7 @@
                                 @click="toggleTag('instrument', instrument.name)"
                                 :class="{'selected': selectedTags.instrument.includes(instrument.name)}"
                                 class="tag-button"
-                                x-text="instrument.name_ja || instrument.name">
+                                x-text="currentLang === 'ja' ? (instrument.name_ja || instrument.name) : instrument.name">
                             </button>
                         </template>
                     </div>
@@ -864,7 +914,7 @@
                 <div class="tag-section" x-show="tempos.length > 0">
                     <div class="tag-label">
                         <div class="tag-label-en">TEMPO</div>
-                        <div class="tag-label-ja">テンポ</div>
+                        <div class="tag-label-ja" x-text="currentLang === 'ja' ? 'テンポ' : ''" x-show="currentLang === 'ja'">テンポ</div>
                     </div>
                     <div class="tag-grid">
                         <template x-for="tempo in tempos">
@@ -873,7 +923,7 @@
                                 :disabled="selectedTags.tempo.length > 0 && !selectedTags.tempo.includes(tempo.name)"
                                 :class="{'selected': selectedTags.tempo.includes(tempo.name)}"
                                 class="tag-button"
-                                x-text="tempo.name_ja || tempo.name">
+                                x-text="currentLang === 'ja' ? (tempo.name_ja || tempo.name) : tempo.name">
                             </button>
                         </template>
                     </div>
@@ -884,7 +934,7 @@
                     <div class="tag-label" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <div class="tag-label-en">DURATION</div>
-                            <div class="tag-label-ja">音楽の長さ</div>
+                            <div class="tag-label-ja" x-text="currentLang === 'ja' ? '音楽の長さ' : ''" x-show="currentLang === 'ja'">音楽の長さ</div>
                         </div>
                         <div class="duration-display" x-text="formatTime(duration)"></div>
                     </div>
@@ -908,8 +958,8 @@
                     @click="generateMusic()"
                     :disabled="!canGenerate() || isGenerating"
                     class="generate-button">
-                    <span x-show="!isGenerating">音楽を生成</span>
-                    <span x-show="isGenerating">生成中...</span>
+                    <span x-show="!isGenerating" x-text="currentLang === 'ja' ? '音楽を生成' : 'Generate Music'">音楽を生成</span>
+                    <span x-show="isGenerating" x-text="currentLang === 'ja' ? '生成中...' : 'Generating...'">生成中...</span>
                 </button>
                 </div>
             </div>
@@ -919,7 +969,7 @@
         <div class="result-section-container">
             <!-- 初期状態 -->
             <div x-show="!generatedMusic && !isGenerating" class="result-empty">
-                <p>タグを選択して、音楽を生成してください</p>
+                <p x-text="currentLang === 'ja' ? 'タグを選択して、音楽を生成してください' : 'Select tags and generate music'">タグを選択して、音楽を生成してください</p>
             </div>
             
             <!-- 生成中 -->
@@ -931,11 +981,11 @@
             <!-- 生成完了 -->
             <div x-show="generatedMusic && !isGenerating" style="width: 100%;">
                 <div class="audio-container">
-                    <h3 style="font-size: 22px; margin-bottom: 30px; font-weight: 600; letter-spacing: 0.04em;">生成完了</h3>
+                    <h3 style="font-size: 22px; margin-bottom: 30px; font-weight: 600; letter-spacing: 0.04em;" x-text="currentLang === 'ja' ? '生成完了' : 'Generation Complete'">生成完了</h3>
                     <audio controls x-show="audioUrl" :src="audioUrl" style="width: 100%; max-width: 800px;"></audio>
                     <div x-show="!audioUrl">
-                        <p style="color: #666; margin-bottom: 8px; font-size: 16px;">音声データはデモモードのため生成されていません</p>
-                        <p style="color: #999; font-size: 12px;">ElevenLabs APIキーを設定すると実際の音楽が生成されます</p>
+                        <p style="color: #666; margin-bottom: 8px; font-size: 16px;" x-text="currentLang === 'ja' ? '音声データはデモモードのため生成されていません' : 'Audio data is not generated in demo mode'">音声データはデモモードのため生成されていません</p>
+                        <p style="color: #999; font-size: 12px;" x-text="currentLang === 'ja' ? 'ElevenLabs APIキーを設定すると実際の音楽が生成されます' : 'Set ElevenLabs API key to generate actual music'">ElevenLabs APIキーを設定すると実際の音楽が生成されます</p>
                     </div>
                 
                     <!-- アクションボタン -->
@@ -944,19 +994,19 @@
                             @click="showDownloadModal()"
                             class="action-button primary" style="margin-right: 15px;"
                             x-show="downloadUrl">
-                            ダウンロード
+                            <span x-text="currentLang === 'ja' ? 'ダウンロード' : 'Download'">ダウンロード</span>
                         </button>
                         <button
                             @click="resetGenerator()"
                             class="action-button">
-                            新規生成
+                            <span x-text="currentLang === 'ja' ? '新規生成' : 'Generate New'">新規生成</span>
                         </button>
                     </div>
                     <!-- 生成情報 -->
                     <div class="generation-info" x-show="audioUrl">
-                        <div>生成時間: <span x-text="generationTime"></span>秒</div>
-                        <div>ファイルサイズ: <span x-text="fileSize"></span></div>
-                        <div>長さ: <span x-text="duration"></span>秒</div>
+                        <div><span x-text="currentLang === 'ja' ? '生成時間: ' : 'Generation Time: '"></span><span x-text="generationTime"></span><span x-text="currentLang === 'ja' ? '秒' : 's'"></span></div>
+                        <div><span x-text="currentLang === 'ja' ? 'ファイルサイズ: ' : 'File Size: '"></span><span x-text="fileSize"></span></div>
+                        <div><span x-text="currentLang === 'ja' ? '長さ: ' : 'Duration: '"></span><span x-text="duration"></span><span x-text="currentLang === 'ja' ? '秒' : 's'"></span></div>
                     </div>
                 </div>
             </div>
@@ -966,14 +1016,14 @@
         <div x-show="showQRCode" x-cloak class="modal-backdrop" @click.self="showQRCode = false" x-transition>
         <div class="modal-content">
             <button @click="showQRCode = false" class="modal-close">×</button>
-            <h3 style="margin-bottom: 25px; color: #333; font-size: 20px; font-weight: 600;">ダウンロード</h3>
+            <h3 style="margin-bottom: 25px; color: #333; font-size: 20px; font-weight: 600;" x-text="currentLang === 'ja' ? 'ダウンロード' : 'Download'">ダウンロード</h3>
 
             <div class="qr-wrapper">
                 <div id="qrcode"></div>
             </div>
 
             <p style="margin-top: 20px; color: #666; font-size: 15px;">
-                スマホでQRコードをスキャンしてダウンロード
+                <span x-text="currentLang === 'ja' ? 'スマホでQRコードをスキャンしてダウンロード' : 'Scan QR code with your smartphone to download'">スマホでQRコードをスキャンしてダウンロード</span>
             </p>
 
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
@@ -982,15 +1032,15 @@
                    style="color: #666; font-size: 14px; text-decoration: none; padding: 10px 24px; border: 1px solid #ddd; border-radius: 6px; display: inline-block; transition: all 0.2s;"
                    onmouseover="this.style.background='#f5f5f5'; this.style.borderColor='#999';"
                    onmouseout="this.style.background='transparent'; this.style.borderColor='#ddd';">
-                    PCから直接ダウンロード
+                    <span x-text="currentLang === 'ja' ? 'PCから直接ダウンロード' : 'Download directly from PC'">PCから直接ダウンロード</span>
                 </a>
             </div>
 
             <div class="notice">
-                <div class="notice-title">⚠️ ご利用にあたっての注意事項</div>
-                <div>生成された音楽は商用利用を禁止します。</div>
-                <div>個人利用の範囲でお楽しみください。</div>
-                <div>Tokyo Game Show 2025デモ版のため、実際の製品とは異なる場合があります。</div>
+                <div class="notice-title" x-text="currentLang === 'ja' ? '⚠️ ご利用にあたっての注意事項' : '⚠️ Terms of Use'">⚠️ ご利用にあたっての注意事項</div>
+                <div x-text="currentLang === 'ja' ? '生成された音楽は商用利用を禁止します。' : 'Commercial use of generated music is prohibited.'">生成された音楽は商用利用を禁止します。</div>
+                <div x-text="currentLang === 'ja' ? '個人利用の範囲でお楽しみください。' : 'Please enjoy for personal use only.'">個人利用の範囲でお楽しみください。</div>
+                <div x-text="currentLang === 'ja' ? 'Tokyo Game Show 2025デモ版のため、実際の製品とは異なる場合があります。' : 'This is a demo version for Tokyo Game Show 2025 and may differ from the actual product.'">Tokyo Game Show 2025デモ版のため、実際の製品とは異なる場合があります。</div>
             </div>
         </div>
     </div>
@@ -1000,6 +1050,7 @@
         function musicGenerator() {
             return {
                 isLoading: true,
+                currentLang: localStorage.getItem('language') || 'ja',
                 tagData: {},
                 genres: [],
                 moods: [],
@@ -1018,7 +1069,23 @@
                 duration: 30,
                 isGenerating: false,
                 generatedMusic: false,
-                generatingMessage: 'プロンプトを生成中...',
+                generatingMessage: '',
+                messages: {
+                    ja: {
+                        generatingPrompt: 'プロンプトを生成中...',
+                        generating: '生成中...',
+                        generationError: '生成エラー',
+                        unknownError: '不明なエラー',
+                        errorOccurred: '音楽生成中にエラーが発生しました'
+                    },
+                    en: {
+                        generatingPrompt: 'Generating prompt...',
+                        generating: 'Generating...',
+                        generationError: 'Generation error',
+                        unknownError: 'Unknown error',
+                        errorOccurred: 'An error occurred during music generation'
+                    }
+                },
                 
                 generatedPrompt: '',
                 audioUrl: '',
@@ -1060,11 +1127,11 @@
                 
                 async generateMusic() {
                     this.isGenerating = true;
-                    this.generatingMessage = 'プロンプトを生成中...';
+                    this.generatingMessage = this.messages[this.currentLang].generatingPrompt;
                     
                     setTimeout(() => {
                         if (this.isGenerating) {
-                            this.generatingMessage = '生成中...';
+                            this.generatingMessage = this.messages[this.currentLang].generating;
                         }
                     }, 2000);
                     
@@ -1114,12 +1181,12 @@
                             this.fileSize = data.file_size_bytes ?
                                 `${(data.file_size_bytes / 1024 / 1024).toFixed(1)} MB` : '0 MB';
                         } else {
-                            alert(`生成エラー: ${data.error_message || '不明なエラー'}`);
+                            alert(`${this.messages[this.currentLang].generationError}: ${data.error_message || this.messages[this.currentLang].unknownError}`);
                         }
                     } catch (error) {
                         this.isGenerating = false;
                         console.error('生成エラー:', error);
-                        alert('音楽生成中にエラーが発生しました');
+                        alert(this.messages[this.currentLang].errorOccurred);
                     }
                 },
                 
@@ -1187,6 +1254,8 @@
                 },
                 
                 async init() {
+                    // 初期メッセージ設定
+                    this.generatingMessage = this.messages[this.currentLang].generatingPrompt;
                     // ページロード時にサーバーのファイルをクリーンアップ
                     try {
                         await fetch('/api/cleanup', { method: 'DELETE' });
