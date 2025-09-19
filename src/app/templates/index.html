@@ -31,8 +31,9 @@
             font-feature-settings: "palt";
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            overflow: hidden;
-            height: 100vh;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
         }
         
         @media (max-width: 768px) {
@@ -149,7 +150,7 @@
 
         /* レイアウト */
         .container {
-            height: 100vh;
+            min-height: 100vh;
             background: #fff;
             display: flex;
             flex-direction: column;
@@ -270,8 +271,9 @@
             display: flex;
             flex-direction: column;
             margin-top: 80px;
-            height: calc(100vh - 80px);
-            overflow: hidden;
+            min-height: calc(100vh - 80px);
+            overflow-x: hidden;
+            overflow-y: auto;
         }
         
         /* 生成セクション */
@@ -290,6 +292,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 400px;
         }
         
         /* セクションタイトル */
@@ -513,7 +516,10 @@
         }
         
         .action-buttons {
-            display: inline-block;
+            display: inline-flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
         }
         
         .action-button {
@@ -591,8 +597,8 @@
             color: #666;
             line-height: 1.8;
         }
-        /* レスポンシブ対応 */
-        @media (max-width: 1024px) {
+        /* Windowsや小さい画面用調整 */
+        @media (max-width: 1024px), (max-height: 800px) {
             .header {
                 padding: 0 40px;
             }
@@ -626,7 +632,7 @@
             .main-content {
                 height: auto;
                 min-height: calc(100vh - 80px);
-                overflow-y: auto;
+                overflow-y: visible;
             }
             
             .generation-section {
@@ -639,6 +645,7 @@
                 flex: none;
                 height: auto;
                 min-height: 300px;
+                padding: 30px 20px;
             }
             
             .tag-row {
@@ -678,6 +685,7 @@
                 flex-direction: column;
                 gap: 10px;
                 width: 100%;
+                margin-bottom: 20px;
             }
             
             .action-button {
