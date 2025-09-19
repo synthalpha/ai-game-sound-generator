@@ -175,6 +175,7 @@
             z-index: 100;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 60px;
         }
 
@@ -208,8 +209,7 @@
         
         .header-nav {
             display: flex;
-            gap: 50px;
-            margin-left: auto;
+            gap: 30px;
             align-items: center;
         }
 
@@ -226,6 +226,9 @@
             cursor: pointer;
             letter-spacing: 0.08em;
             margin-left: 20px;
+            min-width: 100px;
+            text-align: center;
+            display: inline-block;
         }
 
         .logout-button:hover {
@@ -241,7 +244,7 @@
             background: #f5f5f5;
             border-radius: 20px;
             padding: 4px;
-            margin-right: 20px;
+            margin-left: 30px;
         }
 
         .language-btn {
@@ -273,11 +276,14 @@
             color: #000;
             text-decoration: none;
             letter-spacing: 0.08em;
-            padding: 8px 0;
+            padding: 8px 12px;
             position: relative;
             transition: none;
             opacity: 0.6;
             white-space: nowrap;
+            min-width: 100px;
+            text-align: center;
+            display: inline-block;
         }
         
         .nav-link:hover {
@@ -788,11 +794,6 @@
             </h1>
         </div>
         <nav class="header-nav">
-            <div class="language-toggle" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
-                 x-init="$watch('lang', value => { localStorage.setItem('language', value); window.dispatchEvent(new CustomEvent('language-changed', { detail: value })); })">
-                <button @click="lang = 'ja'" :class="{'active': lang === 'ja'}" class="language-btn">JP</button>
-                <button @click="lang = 'en'" :class="{'active': lang === 'en'}" class="language-btn">EN</button>
-            </div>
             <a href="/" class="nav-link active" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
                x-text="lang === 'ja' ? 'トラック生成' : 'Track Generation'"
                @language-changed.window="lang = $event.detail">トラック生成</a>
@@ -802,6 +803,11 @@
             <a href="/logout" class="logout-button" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
                x-text="lang === 'ja' ? 'ログアウト' : 'Logout'"
                @language-changed.window="lang = $event.detail">ログアウト</a>
+            <div class="language-toggle" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+                 x-init="$watch('lang', value => { localStorage.setItem('language', value); window.dispatchEvent(new CustomEvent('language-changed', { detail: value })); })">
+                <button @click="lang = 'ja'" :class="{'active': lang === 'ja'}" class="language-btn">JP</button>
+                <button @click="lang = 'en'" :class="{'active': lang === 'en'}" class="language-btn">EN</button>
+            </div>
         </nav>
     </div>
     
