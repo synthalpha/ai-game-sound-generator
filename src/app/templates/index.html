@@ -147,7 +147,6 @@
             display: none !important;
         }
 
->>>>>>> Stashed changes
         /* レイアウト */
         .container {
             height: 100vh;
@@ -933,19 +932,12 @@
                 
                     <!-- アクションボタン -->
                     <div class="action-buttons" style="margin-top: 30px;">
-<<<<<<< Updated upstream
-                        <a 
-                            :href="downloadUrl" 
-                            :download="`generated_music_${duration}s.mp3`"
-                            class="action-button primary" style="margin-right: 15px;">
-=======
                         <button
                             @click="showDownloadModal()"
                             class="action-button primary" style="margin-right: 15px;"
                             x-show="downloadUrl">
->>>>>>> Stashed changes
                             ダウンロード
-                        </a>
+                        </button>
                         <button 
                             @click="resetGenerator()"
                             class="action-button">
@@ -961,10 +953,6 @@
                 </div>
             </div>
         </div>
-<<<<<<< Updated upstream
-    </div>
-    
-=======
 
         <!-- ダウンロードモーダル -->
         <div x-show="showQRCode" x-cloak class="modal-backdrop" @click.self="showQRCode = false" x-transition>
@@ -1000,7 +988,6 @@
     </div>
     </div>
 
->>>>>>> Stashed changes
     <script>
         function musicGenerator() {
             return {
@@ -1028,12 +1015,9 @@
                 generatedPrompt: '',
                 audioUrl: '',
                 downloadUrl: '',
-<<<<<<< Updated upstream
-=======
                 downloadId: '',
                 showQRCode: false,
                 qrCodeGenerated: false,
->>>>>>> Stashed changes
                 generationTime: 0,
                 fileSize: '0 MB',
                 
