@@ -488,21 +488,21 @@
         <!-- AIエンジンセクション -->
         <section class="engine-section">
             <h3 class="engine-title">HOW IT WORKS</h3>
-            <h4 class="engine-subtitle">
+            <h4 class="engine-subtitle" x-text="lang === 'ja' ? 'シンプルな3ステップ' : 'Simple 3 Steps'">
                 シンプルな3ステップ
             </h4>
             <div class="engine-description">
                 <div style="margin-bottom: 30px;">
                     <strong>STEP 1</strong><br>
-                    ゲームの雰囲気に合わせたタグを選択
+                    <span x-text="lang === 'ja' ? 'ゲームの雰囲気に合わせたタグを選択' : 'Select tags that match your game atmosphere'">ゲームの雰囲気に合わせたタグを選択</span>
                 </div>
                 <div style="margin-bottom: 30px;">
                     <strong>STEP 2</strong><br>
-                    シーンに必要な長さをスライダーで調整
+                    <span x-text="lang === 'ja' ? 'シーンに必要な長さをスライダーで調整' : 'Adjust the length needed for your scene with the slider'">シーンに必要な長さをスライダーで調整</span>
                 </div>
                 <div style="margin-bottom: 30px;">
                     <strong>STEP 3</strong><br>
-                    生成ボタンを押してオリジナル音楽を取得
+                    <span x-text="lang === 'ja' ? '生成ボタンを押してオリジナル音楽を取得' : 'Press the generate button to get original music'">生成ボタンを押してオリジナル音楽を取得</span>
                 </div>
                 <p style="margin-top: 40px; color: #666;" x-html="lang === 'ja' ?
                     '選択したタグの組み合わせから、AIが最適な音楽を生成。<br>プロトタイプから本番まで、すぐに使えるクオリティを提供します。' :
