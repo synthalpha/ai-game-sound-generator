@@ -10,6 +10,9 @@
     
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+    <!-- QRCode.js -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     
     <style>
         * {
@@ -825,17 +828,27 @@
                 
                     <!-- アクションボタン -->
                     <div class="action-buttons" style="margin-top: 30px;">
-                        <a 
-                            :href="downloadUrl" 
-                            :download="`generated_music_${duration}s.mp3`"
+                        <button
+                            @click="toggleDownloadUrl()"
                             class="action-button primary" style="margin-right: 15px;">
                             ダウンロード
-                        </a>
-                        <button 
+                        </button>
+                        <button
                             @click="resetGenerator()"
                             class="action-button">
                             新規生成
                         </button>
+                    </div>
+
+                    <!-- ダウンロードQRコード表示エリア -->
+                    <div x-show="showDownloadUrl" x-transition style="margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px; border: 1px solid #e0e0e0; text-align: center;">
+                        <div id="qrcode" style="background: white; padding: 15px; border-radius: 4px; display: inline-block; margin: 0 auto;"></div>
+                        <p style="margin-top: 15px; color: #666; font-size: 14px;">スマホでQRコードをスキャンしてダウンロード</p>
+                        <p style="margin-top: 10px;">
+                            <a :href="downloadUrl" :download="`generated_music_${duration}s.mp3`" style="color: #999; font-size: 12px; text-decoration: underline;">
+                                PCから直接ダウンロード
+                            </a>
+                        </p>
                     </div>
                     <!-- 生成情報 -->
                     <div class="generation-info" x-show="audioUrl">
@@ -875,6 +888,8 @@
                 generatedPrompt: '',
                 audioUrl: '',
                 downloadUrl: '',
+                showDownloadUrl: false,
+                qrcode: null,
                 generationTime: 0,
                 fileSize: '0 MB',
                 
@@ -978,6 +993,28 @@
                     return new Blob([byteArray], { type: mimeType });
                 },
                 
+                toggleDownloadUrl() {
+                    this.showDownloadUrl = !this.showDownloadUrl;
+                    if (this.showDownloadUrl && this.downloadUrl) {
+                        // QRコードが既に存在する場合は削除
+                        if (this.qrcode) {
+                            document.getElementById('qrcode').innerHTML = '';
+                        }
+
+                        // QRコードを生成
+                        setTimeout(() => {
+                            this.qrcode = new QRCode(document.getElementById('qrcode'), {
+                                text: this.downloadUrl,
+                                width: 150,
+                                height: 150,
+                                colorDark: '#000000',
+                                colorLight: '#ffffff',
+                                correctLevel: QRCode.CorrectLevel.M
+                            });
+                        }, 100); // DOMの更新を待つ
+                    }
+                },
+
                 resetGenerator() {
                     this.generatedMusic = false;
                     this.selectedTags = {
@@ -988,6 +1025,13 @@
                         tempo: []
                     };
                     this.generatedPrompt = '';
+
+                    // QRコードをクリア
+                    if (this.qrcode) {
+                        document.getElementById('qrcode').innerHTML = '';
+                        this.qrcode = null;
+                    }
+
                     if (this.audioUrl && this.audioUrl.startsWith('blob:')) {
                         URL.revokeObjectURL(this.audioUrl);
                     }
@@ -996,6 +1040,7 @@
                     }
                     this.audioUrl = '';
                     this.downloadUrl = '';
+                    this.showDownloadUrl = false;
                 },
                 
                 async init() {
