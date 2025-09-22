@@ -60,16 +60,5 @@ jobs:
           CACHE_TTL: ${{ secrets.CACHE_TTL }}
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
-          # Railwayプロジェクトを初期化（リンク）
-          echo "Initializing Railway project..."
-          railway link || echo "Link failed, continuing..."
-
-          # デプロイ実行（初回は自動的にサービスを作成）
-          echo "Attempting deployment with various approaches..."
-
-          # 方法1: 環境を明示的に指定
-          railway up --environment ${{ env.RAILWAY_ENVIRONMENT }} --detach || \
-          # 方法2: JSONモードで実行（エラー詳細確認）
-          railway up --json --detach || \
-          # 方法3: サービスを作成してデプロイ
-          (railway add -s || true) && railway up --detach
+          # デプロイ実行（環境変数はenvセクションから自動的に設定される）
+          railway up --detach --service web
