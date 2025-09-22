@@ -33,8 +33,10 @@ jobs:
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "RAILWAY_ENVIRONMENT=production" >> $GITHUB_ENV
+            echo "RAILWAY_SERVICE_NAME=ai-game-sound-generator" >> $GITHUB_ENV
           else
             echo "RAILWAY_ENVIRONMENT=development" >> $GITHUB_ENV
+            echo "RAILWAY_SERVICE_NAME=dev-ai-game-sound-generator" >> $GITHUB_ENV
           fi
 
       - name: Install Railway CLI
@@ -42,6 +44,21 @@ jobs:
           # curlでRailway CLIを直接ダウンロード
           curl -fsSL https://railway.app/install.sh | sh
           echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
+      - name: Check and create Railway service if needed
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          # プロジェクトとサービスの確認/作成
+          echo "Checking Railway service: ${{ env.RAILWAY_SERVICE_NAME }}"
+
+          # サービスが存在するか確認（エラーを無視）
+          if ! railway service --service "${{ env.RAILWAY_SERVICE_NAME }}" 2>/dev/null; then
+            echo "Service not found. Creating new service: ${{ env.RAILWAY_SERVICE_NAME }}"
+            railway service create --name "${{ env.RAILWAY_SERVICE_NAME }}" --environment "${{ env.RAILWAY_ENVIRONMENT }}" || true
+          else
+            echo "Service already exists: ${{ env.RAILWAY_SERVICE_NAME }}"
+          fi
 
       - name: Deploy to Railway
         env:
@@ -61,4 +78,4 @@ jobs:
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
           # デプロイ実行（環境変数はenvセクションから自動的に設定される）
-          railway up --detach
+          railway up --service "${{ env.RAILWAY_SERVICE_NAME }}" --environment "${{ env.RAILWAY_ENVIRONMENT }}" --detach
