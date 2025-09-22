@@ -20,8 +20,11 @@ Tokyo Game Show 2025展示用プロトタイプ
 - **uv** - 高速なPythonパッケージマネージャー
 
 ### フロントエンド
-- **Streamlit** - データアプリケーション構築フレームワーク
+- **Alpine.js** - 軽量リアクティブJavaScriptフレームワーク
 - **HTML/CSS** - カスタムスタイリング
+- **Jinja2 Templates** - サーバーサイドテンプレート
+- **QRCode.js** - QRコード生成ライブラリ
+- **Adobe Fonts** - プロフェッショナルフォント
 
 ### AI/音声生成
 - **ElevenLabs API** - 高品質な音声合成API
