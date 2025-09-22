@@ -43,22 +43,19 @@ jobs:
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+          AUTH_ENABLED: ${{ secrets.AUTH_ENABLED }}
+          API_PORT: ${{ secrets.API_PORT }}
+          APP_HOST: ${{ secrets.APP_HOST }}
+          ELEVENLABS_BASE_URL: ${{ secrets.ELEVENLABS_BASE_URL }}
+          ELEVENLABS_TIMEOUT: ${{ secrets.ELEVENLABS_TIMEOUT }}
+          LOG_LEVEL: ${{ secrets.LOG_LEVEL }}
+          API_WORKERS: ${{ secrets.API_WORKERS }}
+          STORAGE_PATH: ${{ secrets.STORAGE_PATH }}
+          CACHE_ENABLED: ${{ secrets.CACHE_ENABLED }}
+          CACHE_TTL: ${{ secrets.CACHE_TTL }}
+          APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
-          # 環境変数設定（Environmentから自動的に適切なSecretsが使用される）
-          railway variables --environment ${{ env.RAILWAY_ENVIRONMENT }} \
-            --set "APP_ENV=${{ env.RAILWAY_ENVIRONMENT }}" \
-            --set "ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}" \
-            --set "AUTH_PASSWORD=${{ secrets.AUTH_PASSWORD }}" \
-            --set "AUTH_ENABLED=${{ secrets.AUTH_ENABLED }}" \
-            --set "API_PORT=${{ secrets.API_PORT }}" \
-            --set "APP_HOST=${{ secrets.APP_HOST }}" \
-            --set "ELEVENLABS_BASE_URL=${{ secrets.ELEVENLABS_BASE_URL }}" \
-            --set "ELEVENLABS_TIMEOUT=${{ secrets.ELEVENLABS_TIMEOUT }}" \
-            --set "LOG_LEVEL=${{ secrets.LOG_LEVEL }}" \
-            --set "API_WORKERS=${{ secrets.API_WORKERS }}" \
-            --set "STORAGE_PATH=${{ secrets.STORAGE_PATH }}" \
-            --set "CACHE_ENABLED=${{ secrets.CACHE_ENABLED }}" \
-            --set "CACHE_TTL=${{ secrets.CACHE_TTL }}"
-
-          # デプロイ実行
-          railway up --environment ${{ env.RAILWAY_ENVIRONMENT }}
+          # デプロイ実行（環境変数はenvセクションから自動的に設定される）
+          railway up --environment ${{ env.RAILWAY_ENVIRONMENT }} --detach
