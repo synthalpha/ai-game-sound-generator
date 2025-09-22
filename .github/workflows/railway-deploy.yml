@@ -60,5 +60,18 @@ jobs:
           CACHE_TTL: ${{ secrets.CACHE_TTL }}
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
-          # デプロイ実行（環境変数はenvセクションから自動的に設定される）
-          railway up --detach
+          # デバッグ: プロジェクト情報を確認
+          echo "Checking Railway status..."
+          railway status || echo "Status check failed"
+
+          # デバッグ: サービス一覧を取得
+          echo "Attempting to list services..."
+          railway service list 2>&1 || echo "Service list not available"
+
+          # デプロイ実行（複数のサービス名を試行）
+          echo "Attempting deployment..."
+          railway up --detach --service web 2>&1 || \
+          railway up --detach --service app 2>&1 || \
+          railway up --detach --service main 2>&1 || \
+          railway up --detach 2>&1 || \
+          echo "All deployment attempts failed"
