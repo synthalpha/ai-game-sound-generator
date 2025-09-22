@@ -1,0 +1,80 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deploy environment'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - develop
+          - production
+
+env:
+  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Railway
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "RAILWAY_ENVIRONMENT=production" >> $GITHUB_ENV
+          else
+            echo "RAILWAY_ENVIRONMENT=development" >> $GITHUB_ENV
+          fi
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          # 環境別の環境変数設定
+          if [[ "${{ env.RAILWAY_ENVIRONMENT }}" == "production" ]]; then
+            # 本番環境
+            railway variables set APP_ENV=production --environment production
+            railway variables set ELEVENLABS_API_KEY=${{ secrets.PROD_ELEVENLABS_API_KEY }} --environment production
+            railway variables set AUTH_PASSWORD=${{ secrets.PROD_AUTH_PASSWORD }} --environment production
+            railway variables set AUTH_ENABLED=${{ secrets.PROD_AUTH_ENABLED }} --environment production
+            railway variables set API_PORT=${{ secrets.PROD_API_PORT }} --environment production
+            railway variables set APP_HOST=${{ secrets.PROD_APP_HOST }} --environment production
+            railway variables set ELEVENLABS_BASE_URL=${{ secrets.PROD_ELEVENLABS_BASE_URL }} --environment production
+            railway variables set ELEVENLABS_TIMEOUT=${{ secrets.PROD_ELEVENLABS_TIMEOUT }} --environment production
+            railway variables set LOG_LEVEL=${{ secrets.PROD_LOG_LEVEL }} --environment production
+            railway variables set API_WORKERS=${{ secrets.PROD_API_WORKERS }} --environment production
+            railway variables set STORAGE_PATH=${{ secrets.PROD_STORAGE_PATH }} --environment production
+            railway variables set CACHE_ENABLED=${{ secrets.PROD_CACHE_ENABLED }} --environment production
+            railway variables set CACHE_TTL=${{ secrets.PROD_CACHE_TTL }} --environment production
+          else
+            # 開発環境
+            railway variables set APP_ENV=development --environment development
+            railway variables set ELEVENLABS_API_KEY=${{ secrets.DEV_ELEVENLABS_API_KEY }} --environment development
+            railway variables set AUTH_PASSWORD=${{ secrets.DEV_AUTH_PASSWORD }} --environment development
+            railway variables set AUTH_ENABLED=${{ secrets.DEV_AUTH_ENABLED }} --environment development
+            railway variables set API_PORT=${{ secrets.DEV_API_PORT }} --environment development
+            railway variables set APP_HOST=${{ secrets.DEV_APP_HOST }} --environment development
+            railway variables set ELEVENLABS_BASE_URL=${{ secrets.DEV_ELEVENLABS_BASE_URL }} --environment development
+            railway variables set ELEVENLABS_TIMEOUT=${{ secrets.DEV_ELEVENLABS_TIMEOUT }} --environment development
+            railway variables set LOG_LEVEL=${{ secrets.DEV_LOG_LEVEL }} --environment development
+            railway variables set API_WORKERS=${{ secrets.DEV_API_WORKERS }} --environment development
+            railway variables set STORAGE_PATH=${{ secrets.DEV_STORAGE_PATH }} --environment development
+            railway variables set CACHE_ENABLED=${{ secrets.DEV_CACHE_ENABLED }} --environment development
+            railway variables set CACHE_TTL=${{ secrets.DEV_CACHE_TTL }} --environment development
+          fi
+
+          # デプロイ実行
+          railway up --environment ${{ env.RAILWAY_ENVIRONMENT }}
