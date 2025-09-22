@@ -61,4 +61,4 @@ jobs:
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
           # デプロイ実行（環境変数はenvセクションから自動的に設定される）
-          railway up --environment ${{ env.RAILWAY_ENVIRONMENT }} --detach
+          railway up --detach
