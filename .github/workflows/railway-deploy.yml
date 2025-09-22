@@ -24,24 +24,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy to Railway
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    container: ghcr.io/railwayapp/cli:latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set environment variables
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "RAILWAY_ENVIRONMENT=production" >> $GITHUB_ENV
-          else
-            echo "RAILWAY_ENVIRONMENT=development" >> $GITHUB_ENV
-          fi
-
-      - name: Install Railway CLI
-        run: |
-          # curlでRailway CLIを直接ダウンロード
-          curl -fsSL https://railway.app/install.sh | sh
-          echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
       - name: Deploy to Railway
         env:
@@ -58,11 +45,6 @@ jobs:
           STORAGE_PATH: ${{ secrets.STORAGE_PATH }}
           CACHE_ENABLED: ${{ secrets.CACHE_ENABLED }}
           CACHE_TTL: ${{ secrets.CACHE_TTL }}
-          APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
-          # デプロイ実行
-          # --environment オプションは公式ドキュメントに記載あり
-          RAILWAY_TOKEN="${{ secrets.RAILWAY_TOKEN }}" railway up \
-            --service "${{ secrets.RAILWAY_SERVICE_NAME }}" \
-            --environment "${{ env.RAILWAY_ENVIRONMENT }}" \
-            --detach
+          # Railway CLIを使用してデプロイ（Dockerコンテナ内で実行）
+          railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --detach
