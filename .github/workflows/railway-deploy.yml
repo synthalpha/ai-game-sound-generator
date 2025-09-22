@@ -61,6 +61,8 @@ jobs:
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
           # デプロイ実行
+          # --environment オプションは公式ドキュメントに記載あり
           RAILWAY_TOKEN="${{ secrets.RAILWAY_TOKEN }}" railway up \
             --service "${{ secrets.RAILWAY_SERVICE_NAME }}" \
+            --environment "${{ env.RAILWAY_ENVIRONMENT }}" \
             --detach
