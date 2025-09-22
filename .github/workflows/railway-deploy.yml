@@ -60,5 +60,5 @@ jobs:
           CACHE_TTL: ${{ secrets.CACHE_TTL }}
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
-          # デプロイ実行（サービス名はSecretsから取得）
-          railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --detach
+          # デプロイ実行（トークンとサービス名をSecretsから取得）
+          RAILWAY_TOKEN="${{ secrets.RAILWAY_TOKEN }}" railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --detach
