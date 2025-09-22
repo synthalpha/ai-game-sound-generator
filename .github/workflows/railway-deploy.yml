@@ -46,34 +46,36 @@ jobs:
           # 環境別の環境変数設定
           if [[ "${{ env.RAILWAY_ENVIRONMENT }}" == "production" ]]; then
             # 本番環境
-            railway variables set APP_ENV=production --environment production
-            railway variables set ELEVENLABS_API_KEY=${{ secrets.PROD_ELEVENLABS_API_KEY }} --environment production
-            railway variables set AUTH_PASSWORD=${{ secrets.PROD_AUTH_PASSWORD }} --environment production
-            railway variables set AUTH_ENABLED=${{ secrets.PROD_AUTH_ENABLED }} --environment production
-            railway variables set API_PORT=${{ secrets.PROD_API_PORT }} --environment production
-            railway variables set APP_HOST=${{ secrets.PROD_APP_HOST }} --environment production
-            railway variables set ELEVENLABS_BASE_URL=${{ secrets.PROD_ELEVENLABS_BASE_URL }} --environment production
-            railway variables set ELEVENLABS_TIMEOUT=${{ secrets.PROD_ELEVENLABS_TIMEOUT }} --environment production
-            railway variables set LOG_LEVEL=${{ secrets.PROD_LOG_LEVEL }} --environment production
-            railway variables set API_WORKERS=${{ secrets.PROD_API_WORKERS }} --environment production
-            railway variables set STORAGE_PATH=${{ secrets.PROD_STORAGE_PATH }} --environment production
-            railway variables set CACHE_ENABLED=${{ secrets.PROD_CACHE_ENABLED }} --environment production
-            railway variables set CACHE_TTL=${{ secrets.PROD_CACHE_TTL }} --environment production
+            railway variables --environment production \
+              --set "APP_ENV=production" \
+              --set "ELEVENLABS_API_KEY=${{ secrets.PROD_ELEVENLABS_API_KEY }}" \
+              --set "AUTH_PASSWORD=${{ secrets.PROD_AUTH_PASSWORD }}" \
+              --set "AUTH_ENABLED=${{ secrets.PROD_AUTH_ENABLED }}" \
+              --set "API_PORT=${{ secrets.PROD_API_PORT }}" \
+              --set "APP_HOST=${{ secrets.PROD_APP_HOST }}" \
+              --set "ELEVENLABS_BASE_URL=${{ secrets.PROD_ELEVENLABS_BASE_URL }}" \
+              --set "ELEVENLABS_TIMEOUT=${{ secrets.PROD_ELEVENLABS_TIMEOUT }}" \
+              --set "LOG_LEVEL=${{ secrets.PROD_LOG_LEVEL }}" \
+              --set "API_WORKERS=${{ secrets.PROD_API_WORKERS }}" \
+              --set "STORAGE_PATH=${{ secrets.PROD_STORAGE_PATH }}" \
+              --set "CACHE_ENABLED=${{ secrets.PROD_CACHE_ENABLED }}" \
+              --set "CACHE_TTL=${{ secrets.PROD_CACHE_TTL }}"
           else
             # 開発環境
-            railway variables set APP_ENV=development --environment development
-            railway variables set ELEVENLABS_API_KEY=${{ secrets.DEV_ELEVENLABS_API_KEY }} --environment development
-            railway variables set AUTH_PASSWORD=${{ secrets.DEV_AUTH_PASSWORD }} --environment development
-            railway variables set AUTH_ENABLED=${{ secrets.DEV_AUTH_ENABLED }} --environment development
-            railway variables set API_PORT=${{ secrets.DEV_API_PORT }} --environment development
-            railway variables set APP_HOST=${{ secrets.DEV_APP_HOST }} --environment development
-            railway variables set ELEVENLABS_BASE_URL=${{ secrets.DEV_ELEVENLABS_BASE_URL }} --environment development
-            railway variables set ELEVENLABS_TIMEOUT=${{ secrets.DEV_ELEVENLABS_TIMEOUT }} --environment development
-            railway variables set LOG_LEVEL=${{ secrets.DEV_LOG_LEVEL }} --environment development
-            railway variables set API_WORKERS=${{ secrets.DEV_API_WORKERS }} --environment development
-            railway variables set STORAGE_PATH=${{ secrets.DEV_STORAGE_PATH }} --environment development
-            railway variables set CACHE_ENABLED=${{ secrets.DEV_CACHE_ENABLED }} --environment development
-            railway variables set CACHE_TTL=${{ secrets.DEV_CACHE_TTL }} --environment development
+            railway variables --environment development \
+              --set "APP_ENV=development" \
+              --set "ELEVENLABS_API_KEY=${{ secrets.DEV_ELEVENLABS_API_KEY }}" \
+              --set "AUTH_PASSWORD=${{ secrets.DEV_AUTH_PASSWORD }}" \
+              --set "AUTH_ENABLED=${{ secrets.DEV_AUTH_ENABLED }}" \
+              --set "API_PORT=${{ secrets.DEV_API_PORT }}" \
+              --set "APP_HOST=${{ secrets.DEV_APP_HOST }}" \
+              --set "ELEVENLABS_BASE_URL=${{ secrets.DEV_ELEVENLABS_BASE_URL }}" \
+              --set "ELEVENLABS_TIMEOUT=${{ secrets.DEV_ELEVENLABS_TIMEOUT }}" \
+              --set "LOG_LEVEL=${{ secrets.DEV_LOG_LEVEL }}" \
+              --set "API_WORKERS=${{ secrets.DEV_API_WORKERS }}" \
+              --set "STORAGE_PATH=${{ secrets.DEV_STORAGE_PATH }}" \
+              --set "CACHE_ENABLED=${{ secrets.DEV_CACHE_ENABLED }}" \
+              --set "CACHE_TTL=${{ secrets.DEV_CACHE_TTL }}"
           fi
 
           # デプロイ実行
