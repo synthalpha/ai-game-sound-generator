@@ -3,8 +3,8 @@
 # UI関連
 "area: ui":
   - src/app/**/*
-  - src/controllers/streamlit/**/*
-  - .streamlit/**/*
+  - src/app/templates/**/*
+  - src/app/static/**/*
 
 # API関連
 "area: api":

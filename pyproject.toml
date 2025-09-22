@@ -118,8 +118,6 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
-    "streamlit.*",
-    "streamlit_extras.*",
     "dependency_injector.*",
     "structlog.*",
 ]
