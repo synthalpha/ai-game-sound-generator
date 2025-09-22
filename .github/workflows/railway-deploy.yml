@@ -62,14 +62,10 @@ jobs:
           CACHE_TTL: ${{ secrets.CACHE_TTL }}
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
-          # デバッグ情報を出力
-          echo "Checking Railway authentication..."
-          railway whoami
-
-          echo "Listing available projects..."
-          railway project || echo "Project list failed"
-
           echo "Deploying to Railway: ${{ env.RAILWAY_SERVICE_NAME }} in ${{ env.RAILWAY_ENVIRONMENT }}"
 
-          # シンプルにデプロイ（サービス名と環境を指定しない）
-          railway up --detach
+          # CLIにトークンを明示的に渡してデプロイ
+          RAILWAY_TOKEN="${{ secrets.RAILWAY_TOKEN }}" railway up \
+            --service "${{ env.RAILWAY_SERVICE_NAME }}" \
+            --environment "${{ env.RAILWAY_ENVIRONMENT }}" \
+            --detach
