@@ -41,9 +41,15 @@ jobs:
 
       - name: Install Railway CLI
         run: |
-          # curlでRailway CLIを直接ダウンロード
+          # Railway CLIをインストール
           curl -fsSL https://railway.app/install.sh | sh
-          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
+          # PATHを即座に更新
+          export PATH="$HOME/.railway/bin:$PATH"
+
+          # 確認
+          which railway || echo "Railway not found in PATH"
+          railway version || echo "Railway version check failed"
 
       - name: Deploy to Railway
         env:
@@ -62,6 +68,9 @@ jobs:
           CACHE_TTL: ${{ secrets.CACHE_TTL }}
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
+          # PATHを設定
+          export PATH="$HOME/.railway/bin:$PATH"
+
           echo "Available Railway services:"
           RAILWAY_TOKEN="${{ secrets.RAILWAY_TOKEN }}" railway service list || echo "Failed to list services"
 
