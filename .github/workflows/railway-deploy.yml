@@ -60,6 +60,8 @@ jobs:
           CACHE_TTL: ${{ secrets.CACHE_TTL }}
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
+          # サービスを作成（既に存在する場合はエラーになるが無視）
+          railway add --service "app" || true
+
           # デプロイ実行（環境変数はenvセクションから自動的に設定される）
-          # 環境を明示的に指定してデプロイ
-          railway up --environment ${{ env.RAILWAY_ENVIRONMENT }} --detach
+          railway up --environment ${{ env.RAILWAY_ENVIRONMENT }} --service "app" --detach
