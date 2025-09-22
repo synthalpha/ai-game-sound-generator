@@ -62,7 +62,11 @@ jobs:
           CACHE_TTL: ${{ secrets.CACHE_TTL }}
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
-          echo "Deploying to Railway service: ${{ env.RAILWAY_SERVICE_NAME }}"
+          echo "Available Railway services:"
+          RAILWAY_TOKEN="${{ secrets.RAILWAY_TOKEN }}" railway service list || echo "Failed to list services"
+
+          echo ""
+          echo "Attempting to deploy to: ${{ env.RAILWAY_SERVICE_NAME }}"
 
           # トークンとサービス名を指定してデプロイ
           RAILWAY_TOKEN="${{ secrets.RAILWAY_TOKEN }}" railway up --service "${{ env.RAILWAY_SERVICE_NAME }}" --detach
