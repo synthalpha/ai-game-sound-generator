@@ -45,6 +45,24 @@ jobs:
           curl -fsSL https://railway.app/install.sh | sh
           echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
+      - name: Create or link Railway service
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "Setting up service: ${{ env.RAILWAY_SERVICE_NAME }} in ${{ env.RAILWAY_ENVIRONMENT }}"
+
+          # プロジェクトにリンク（環境を指定）
+          railway link --environment "${{ env.RAILWAY_ENVIRONMENT }}"
+
+          # サービスのリストを取得して、対象サービスが存在するか確認
+          if railway service list | grep -q "${{ env.RAILWAY_SERVICE_NAME }}"; then
+            echo "Service ${{ env.RAILWAY_SERVICE_NAME }} already exists"
+          else
+            echo "Creating new service: ${{ env.RAILWAY_SERVICE_NAME }}"
+            # 新しいサービスを作成（名前を指定）
+            railway service create "${{ env.RAILWAY_SERVICE_NAME }}"
+          fi
+
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
@@ -62,6 +80,6 @@ jobs:
           CACHE_TTL: ${{ secrets.CACHE_TTL }}
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
-          # デプロイ実行（サービスが存在しない場合は自動作成される）
-          echo "Deploying to Railway: ${{ env.RAILWAY_SERVICE_NAME }} in ${{ env.RAILWAY_ENVIRONMENT }}"
+          # サービスを指定してデプロイ
+          echo "Deploying to service: ${{ env.RAILWAY_SERVICE_NAME }}"
           railway up --service "${{ env.RAILWAY_SERVICE_NAME }}" --detach
