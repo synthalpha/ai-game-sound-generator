@@ -61,4 +61,6 @@ jobs:
           APP_ENV: ${{ env.RAILWAY_ENVIRONMENT }}
         run: |
           # デプロイ実行（環境変数はenvセクションから自動的に設定される）
+          # 初回は新規サービスとして作成、2回目以降は既存サービスを使用
+          railway up --environment ${{ env.RAILWAY_ENVIRONMENT }} --detach || \
           railway up --environment ${{ env.RAILWAY_ENVIRONMENT }} --service ai-game-sound-generator --detach
