@@ -1,0 +1,22 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "./Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# 環境別設定
+[[environments]]
+name = "production"
+
+  [environments.deploy]
+  numReplicas = 1
+
+[[environments]]
+name = "development"
+
+  [environments.deploy]
+  numReplicas = 1
