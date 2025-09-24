@@ -1,5 +1,5 @@
-# ベースイメージ
-FROM python:3.12-slim AS base
+# ベースイメージ（AWS ECR Public Gallery使用 - Docker Hub rate limit回避）
+FROM public.ecr.aws/docker/library/python:3.12-slim AS base
 
 WORKDIR /app
 
