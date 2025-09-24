@@ -211,3 +211,8 @@ __marimo__/
 .local/
 output/
 src/test_*.py
+
+# 統計データベース
+logs/
+*.db
+*.db-journal

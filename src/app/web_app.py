@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from src.adapters.controllers.audio_generation.api import router as api_router
+from src.infrastructure.database import close_db, init_db
 from src.utils.monitoring import monitoring_service, start_monitoring_tasks
 from src.utils.session_manager import session_manager
 
@@ -50,6 +51,10 @@ app.include_router(api_router)
 async def startup_event():
     """アプリケーション起動時の処理。"""
     import platform
+
+    # データベースの初期化
+    await init_db()
+    print("Database initialized")
 
     # セッションクリーンアップタスクを開始
     await session_manager.start_cleanup_task()
@@ -91,6 +96,10 @@ async def shutdown_event():
     # セッションクリーンアップタスクを停止
     await session_manager.stop_cleanup_task()
     print("Session cleanup task stopped")
+
+    # データベース接続をクローズ
+    await close_db()
+    print("Database connection closed")
 
 
 @app.get("/login", response_class=HTMLResponse)

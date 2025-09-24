@@ -11,9 +11,10 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, Cookie, HTTPException, Request
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.adapters.gateways.elevenlabs import ElevenLabs
 from src.adapters.repositories.prompt_repository import PromptRepository
@@ -21,6 +22,8 @@ from src.adapters.repositories.tag_repository import TagRepository
 from src.di_container.config import ElevenLabsConfig
 from src.entities.music_generation import MusicGenerationRequest
 from src.entities.prompt import PromptType
+from src.infrastructure.database import get_db
+from src.infrastructure.statistics_repository import StatisticsRepository
 from src.usecases.prompt_generation.generate_prompt import GeneratePromptUseCase
 from src.utils.monitoring import monitoring_service
 from src.utils.session_manager import session_manager
@@ -86,6 +89,7 @@ async def generate_music(
     request: GenerateMusicRequest,
     http_request: Request,
     session: str | None = Cookie(None),
+    db: AsyncSession = Depends(get_db),
 ) -> GenerateMusicResponse:
     """音楽を生成。"""
     import time
@@ -106,6 +110,11 @@ async def generate_music(
         is_allowed, error_message = session_manager.check_rate_limit(session_id)
         if not is_allowed:
             monitoring_service.increment_rate_limited()
+
+            # データベースにレート制限を記録
+            stats_repo = StatisticsRepository(db)
+            await stats_repo.log_rate_limit(session_id)
+
             return GenerateMusicResponse(
                 success=False,
                 prompt="",
@@ -219,6 +228,33 @@ async def generate_music(
         # 統計を更新
         monitoring_service.increment_generation(is_demo=is_demo_machine)
 
+        # データベースに生成ログを記録
+        stats_repo = StatisticsRepository(db)
+        request_data = {
+            "genre_tags": request.genre_tags,
+            "mood_tags": request.mood_tags,
+            "scene_tags": request.scene_tags,
+            "instrument_tags": request.instrument_tags,
+            "tempo_tags": request.tempo_tags,
+            "era_tags": request.era_tags,
+            "region_tags": request.region_tags,
+            "duration_seconds": request.duration_seconds,
+        }
+        response_data = {
+            "success": True,
+            "file_size_bytes": music_file.file_size_bytes,
+            "download_id": download_id,
+        }
+        await stats_repo.log_generation(
+            session_id=session_id,
+            ip_address=client_ip,
+            is_demo=is_demo_machine,
+            request_data=request_data,
+            response_data=response_data,
+            prompt=prompt.text,
+            generation_time=generation_time,
+        )
+
         return GenerateMusicResponse(
             success=True,
             prompt=prompt.text,
@@ -233,6 +269,34 @@ async def generate_music(
     except Exception as e:
         generation_time = time.time() - start_time
         monitoring_service.increment_error()
+
+        # エラーログを記録
+        stats_repo = StatisticsRepository(db)
+        request_data = {
+            "genre_tags": request.genre_tags,
+            "mood_tags": request.mood_tags,
+            "scene_tags": request.scene_tags,
+            "instrument_tags": request.instrument_tags,
+            "tempo_tags": request.tempo_tags,
+            "era_tags": request.era_tags,
+            "region_tags": request.region_tags,
+            "duration_seconds": request.duration_seconds,
+        }
+        response_data = {
+            "success": False,
+            "error_message": str(e),
+            "error_type": "generation_error",
+        }
+        await stats_repo.log_generation(
+            session_id=session_id,
+            ip_address=client_ip,
+            is_demo=is_demo_machine,
+            request_data=request_data,
+            response_data=response_data,
+            prompt="",
+            generation_time=generation_time,
+        )
+
         return GenerateMusicResponse(
             success=False,
             prompt="",
@@ -244,6 +308,9 @@ async def generate_music(
 @router.get("/download/{download_id}")
 async def download_music(
     download_id: str,
+    request: Request,
+    session: str | None = Cookie(None),
+    db: AsyncSession = Depends(get_db),
 ):
     """生成した音楽ファイルをダウンロード。"""
     # 高速インデックスを使用してファイルを検索
@@ -252,6 +319,23 @@ async def download_music(
     if session_file:
         file_path = Path(session_file.path)
         if file_path.exists():
+            # ダウンロードログを記録
+            client_ip = request.client.host if request.client else "unknown"
+            user_agent = request.headers.get("user-agent", "")
+            current_session = get_session_id(request, session)
+
+            # QRコードアクセスの判定（異なるセッションからのダウンロード）
+            is_qr = (current_session != session_id) if session_id else False
+
+            stats_repo = StatisticsRepository(db)
+            await stats_repo.log_download(
+                download_id=download_id,
+                session_id=current_session,
+                ip_address=client_ip,
+                user_agent=user_agent,
+                is_qr=is_qr,
+            )
+
             return FileResponse(
                 path=file_path,
                 filename=session_file.filename,
