@@ -6,102 +6,45 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deploy target (Railway environment name)'
+        description: 'GitHub Environment name (must match exactly)'
         required: true
         default: 'development'
         type: choice
-        options: [development, production]
+        options:
+          - development
+          - production
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    environment: ${{ github.event_name == 'workflow_dispatch'
+      && inputs.environment
+      || (github.ref == 'refs/heads/main' && 'production' || 'development') }}
 
-      - name: Install Railway CLI
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI (non-interactive)
         run: |
           curl -fsSL https://railway.app/install.sh | sh
           echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
-      - name: Deploy
+      - name: Deploy (uses Environment secrets)
         env:
-          # 必須シークレット
+          # ここで参照する secrets は「その Environment」にある必要があります
           RAILWAY_TOKEN:        ${{ secrets.RAILWAY_TOKEN }}
           RAILWAY_PROJECT_ID:   ${{ secrets.RAILWAY_PROJECT_ID }}
           RAILWAY_SERVICE_NAME: ${{ secrets.RAILWAY_SERVICE_NAME }}
-          # 任意：RailwayのEnvironment名（UI上の「Environments」）
-          RAILWAY_ENVIRONMENT:  ${{ inputs.environment || 'development' }}
-          # 必要なら追加シークレットをここで渡す（CLIで変数化するなら後段参照）
-          ELEVENLABS_API_KEY:   ${{ secrets.ELEVENLABS_API_KEY }}
-          AUTH_PASSWORD:        ${{ secrets.AUTH_PASSWORD }}
-          AUTH_ENABLED:         ${{ secrets.AUTH_ENABLED }}
-          API_PORT:             ${{ secrets.API_PORT }}
-          APP_HOST:             ${{ secrets.APP_HOST }}
-          ELEVENLABS_BASE_URL:  ${{ secrets.ELEVENLABS_BASE_URL }}
-          ELEVENLABS_TIMEOUT:   ${{ secrets.ELEVENLABS_TIMEOUT }}
-          LOG_LEVEL:            ${{ secrets.LOG_LEVEL }}
-          API_WORKERS:          ${{ secrets.API_WORKERS }}
-          STORAGE_PATH:         ${{ secrets.STORAGE_PATH }}
-          CACHE_ENABLED:        ${{ secrets.CACHE_ENABLED }}
-          CACHE_TTL:            ${{ secrets.CACHE_TTL }}
         run: |
           set -euo pipefail
-
-          echo "Railway CLI version:"
-          railway --version
-
-          # --- 入力チェック ---
-          [[ -n "${RAILWAY_TOKEN:-}" ]]        || { echo "::error::RAILWAY_TOKEN is empty"; exit 1; }
-          [[ -n "${RAILWAY_PROJECT_ID:-}" ]]   || { echo "::error::RAILWAY_PROJECT_ID is empty"; exit 1; }
-          [[ -n "${RAILWAY_SERVICE_NAME:-}" ]] || { echo "::error::RAILWAY_SERVICE_NAME is empty"; exit 1; }
-
-          # --- 認証（明示ログイン）---
           railway login --token "$RAILWAY_TOKEN"
           railway whoami
 
-          # --- プロジェクト/環境/サービスの存在確認 ---
-          echo "Checking project/services..."
+          [[ -n "${RAILWAY_PROJECT_ID:-}" ]]   || { echo "::error::RAILWAY_PROJECT_ID is empty"; exit 1; }
+          [[ -n "${RAILWAY_SERVICE_NAME:-}" ]] || { echo "::error::RAILWAY_SERVICE_NAME is empty"; exit 1; }
+
           railway project get --project "$RAILWAY_PROJECT_ID" >/dev/null
+          railway service get  --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_NAME" >/dev/null
 
-          echo "Available services:"
-          railway service list --project "$RAILWAY_PROJECT_ID" || true
-
-          # サービス存在チェック（名前でもIDでもOK）
-          if ! railway service get --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_NAME" >/dev/null 2>&1; then
-            echo "::error::Service '$RAILWAY_SERVICE_NAME' not found in project '$RAILWAY_PROJECT_ID'"
-            exit 1
-          fi
-
-          # --- （任意）環境を切り替え ---
-          if [[ -n "${RAILWAY_ENVIRONMENT:-}" ]]; then
-            echo "Switching environment to: $RAILWAY_ENVIRONMENT"
-            railway environment use "$RAILWAY_ENVIRONMENT" \
-              --project "$RAILWAY_PROJECT_ID"
-          fi
-
-          # --- （任意）変数をCLIから反映したい場合 ---
-          # 既にRailwayダッシュボードで設定済みならこのブロックは不要です
-          railway variables set \
-            ELEVENLABS_API_KEY="$ELEVENLABS_API_KEY" \
-            AUTH_PASSWORD="$AUTH_PASSWORD" \
-            AUTH_ENABLED="$AUTH_ENABLED" \
-            API_PORT="$API_PORT" \
-            APP_HOST="$APP_HOST" \
-            ELEVENLABS_BASE_URL="$ELEVENLABS_BASE_URL" \
-            ELEVENLABS_TIMEOUT="$ELEVENLABS_TIMEOUT" \
-            LOG_LEVEL="$LOG_LEVEL" \
-            API_WORKERS="$API_WORKERS" \
-            STORAGE_PATH="$STORAGE_PATH" \
-            CACHE_ENABLED="$CACHE_ENABLED" \
-            CACHE_TTL="$CACHE_TTL" \
-            --project "$RAILWAY_PROJECT_ID" \
-            --service "$RAILWAY_SERVICE_NAME" || true
-
-          # --- デプロイ ---
-          echo "Deploying to service: $RAILWAY_SERVICE_NAME"
-          railway up \
-            --project "$RAILWAY_PROJECT_ID" \
-            --service "$RAILWAY_SERVICE_NAME" \
-            --detach
+          railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_NAME" --detach
