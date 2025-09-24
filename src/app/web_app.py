@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from src.adapters.controllers.audio_generation.api import router as api_router
+from src.utils.session_manager import session_manager
 
 # FastAPIアプリケーション初期化
 app = FastAPI(
@@ -42,6 +43,22 @@ if static_dir.exists():
 
 # APIルーターを追加
 app.include_router(api_router)
+
+
+@app.on_event("startup")
+async def startup_event():
+    """アプリケーション起動時の処理。"""
+    # セッションクリーンアップタスクを開始
+    await session_manager.start_cleanup_task()
+    print("Session cleanup task started")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """アプリケーション停止時の処理。"""
+    # セッションクリーンアップタスクを停止
+    await session_manager.stop_cleanup_task()
+    print("Session cleanup task stopped")
 
 
 @app.get("/login", response_class=HTMLResponse)

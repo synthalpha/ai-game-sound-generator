@@ -1026,6 +1026,11 @@
                 <span x-text="currentLang === 'ja' ? 'スマホでQRコードをスキャンしてダウンロード' : 'Scan QR code with your smartphone to download'">スマホでQRコードをスキャンしてダウンロード</span>
             </p>
 
+            <!-- 有効期限の注意書き -->
+            <p style="margin-top: 10px; color: #666; font-size: 12px;">
+                <span x-text="currentLang === 'ja' ? '※ ファイルは生成から10分後に自動削除されます' : '* Files will be automatically deleted 10 minutes after generation'">※ ファイルは生成から10分後に自動削除されます</span>
+            </p>
+
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
                 <a :href="downloadUrl"
                    :download="`generated_music_${duration}s.mp3`"

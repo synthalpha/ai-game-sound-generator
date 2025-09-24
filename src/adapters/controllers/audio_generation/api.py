@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Cookie, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -22,29 +22,34 @@ from src.di_container.config import ElevenLabsConfig
 from src.entities.music_generation import MusicGenerationRequest
 from src.entities.prompt import PromptType
 from src.usecases.prompt_generation.generate_prompt import GeneratePromptUseCase
+from src.utils.session_manager import session_manager
 
 # 環境変数を読み込み
 load_dotenv()
 
 router = APIRouter(prefix="/api")
 
-# ファイル保存ディレクトリ
-DOWNLOAD_DIR = Path("/tmp/music_downloads")
-DOWNLOAD_DIR.mkdir(exist_ok=True)
 
-# 現在のダウンロードファイル（1つのみ保持）
-current_download_file = {"id": None, "path": None, "filename": None}
+def get_session_id(request: Request, session: str | None = Cookie(None)) -> str:
+    """
+    セッションIDを取得（存在しない場合は作成）。
 
+    Args:
+        request: FastAPIリクエスト
+        session: セッションCookie
 
-def cleanup_old_files():
-    """古いファイルを削除。"""
-    global current_download_file
-    if current_download_file["path"] and Path(current_download_file["path"]).exists():
-        try:
-            Path(current_download_file["path"]).unlink()
-        except Exception as e:
-            print(f"ファイル削除エラー: {e}")
-    current_download_file = {"id": None, "path": None, "filename": None}
+    Returns:
+        セッションID
+    """
+    # Cookieからセッションを取得、なければ新規作成
+    if not session:
+        # IPアドレスとタイムスタンプを元に生成
+        import hashlib
+        import time
+
+        client_ip = request.client.host if request.client else "unknown"
+        session = hashlib.md5(f"{client_ip}_{time.time()}".encode()).hexdigest()
+    return session
 
 
 class GenerateMusicRequest(BaseModel):
@@ -72,14 +77,20 @@ class GenerateMusicResponse(BaseModel):
     duration_seconds: int | None = None
     generation_time: float | None = None
     error_message: str | None = None
+    expires_in_minutes: int = 10
 
 
 @router.post("/generate", response_model=GenerateMusicResponse)
-async def generate_music(request: GenerateMusicRequest) -> GenerateMusicResponse:
+async def generate_music(
+    request: GenerateMusicRequest,
+    http_request: Request,
+    session: str | None = Cookie(None),
+) -> GenerateMusicResponse:
     """音楽を生成。"""
     import time
 
     start_time = time.time()
+    session_id = get_session_id(http_request, session)
 
     try:
         # リポジトリとユースケース初期化
@@ -139,7 +150,12 @@ async def generate_music(request: GenerateMusicRequest) -> GenerateMusicResponse
             duration_seconds=request.duration_seconds,
         )
 
-        music_file = await elevenlabs.compose_music(music_request, output_format="mp3")
+        import asyncio
+
+        if asyncio.iscoroutinefunction(elevenlabs.compose_music):
+            music_file = await elevenlabs.compose_music(music_request, output_format="mp3")
+        else:
+            music_file = elevenlabs.compose_music(music_request, output_format="mp3")
 
         print(
             f"Generated music file: {music_file.file_name}, size: {music_file.file_size_bytes}, duration: {music_file.duration_seconds}"
@@ -150,22 +166,25 @@ async def generate_music(request: GenerateMusicRequest) -> GenerateMusicResponse
             base64.b64encode(music_file.data).decode("utf-8") if music_file.data else None
         )
 
-        # 古いファイルを削除
-        cleanup_old_files()
-
-        # 新しいファイルを保存
+        # ファイルをセッション別に保存（ダウンロード用）
         download_id = str(uuid.uuid4())
         if music_file.data:
-            file_path = DOWNLOAD_DIR / f"{download_id}.mp3"
+            # セッション別ディレクトリに保存
+            session_manager.get_or_create_session(session_id)
+            session_dir = Path(f"/tmp/music_sessions/{session_id}")
+            session_dir.mkdir(parents=True, exist_ok=True)
+
+            file_path = session_dir / f"{download_id}.mp3"
             file_path.write_bytes(music_file.data)
 
-            # 現在のダウンロード情報を更新
-            global current_download_file
-            current_download_file = {
-                "id": download_id,
-                "path": str(file_path),
-                "filename": music_file.file_name,
-            }
+            # セッションにファイル情報を追加
+            session_manager.add_file_to_session(
+                session_id=session_id,
+                file_id=download_id,
+                file_path=str(file_path),
+                filename=music_file.file_name,
+                size_bytes=music_file.file_size_bytes,
+            )
 
         generation_time = time.time() - start_time
 
@@ -191,31 +210,44 @@ async def generate_music(request: GenerateMusicRequest) -> GenerateMusicResponse
 
 
 @router.get("/download/{download_id}")
-async def download_music(download_id: str):
+async def download_music(
+    download_id: str,
+    http_request: Request,
+    session: str | None = Cookie(None),
+):
     """生成した音楽ファイルをダウンロード。"""
-    global current_download_file
+    session_id = get_session_id(http_request, session)
 
-    # ダウンロードIDが一致するか確認
-    if not current_download_file["id"] or current_download_file["id"] != download_id:
+    # セッションからファイルを取得
+    session_file = session_manager.get_session_file(session_id, download_id)
+    if not session_file:
         raise HTTPException(status_code=404, detail="ファイルが見つかりません")
 
     # ファイルが存在するか確認
-    file_path = Path(current_download_file["path"])
+    file_path = Path(session_file.path)
     if not file_path.exists():
+        # ファイルが物理的に存在しない場合はセッションからも削除
+        session_manager.remove_file_from_session(session_id, download_id)
         raise HTTPException(status_code=404, detail="ファイルが見つかりません")
 
     return FileResponse(
         path=file_path,
-        filename=current_download_file["filename"],
+        filename=session_file.filename,
         media_type="audio/mpeg",
     )
 
 
 @router.delete("/cleanup")
 async def cleanup_files():
-    """ファイルをクリーンアップ。"""
-    cleanup_old_files()
-    return {"status": "cleaned"}
+    """期限切れセッションをクリーンアップ。"""
+    deleted_count = await session_manager.cleanup_expired_sessions()
+    return {"status": "cleaned", "deleted_sessions": deleted_count}
+
+
+@router.get("/session/stats")
+async def get_session_stats():
+    """セッション統計情報を取得。"""
+    return session_manager.get_session_stats()
 
 
 @router.get("/tags")
