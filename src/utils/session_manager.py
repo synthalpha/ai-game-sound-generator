@@ -60,6 +60,9 @@ class SessionManager:
         self._max_file_size = max_file_size_mb * 1024 * 1024  # バイトに変換
         self._cleanup_interval = cleanup_interval_minutes * 60  # 秒に変換
         self._sessions: dict[str, SessionData] = {}
+        self._file_index: dict[
+            str, tuple[str, SessionFile]
+        ] = {}  # download_id -> (session_id, SessionFile)の高速検索用インデックス
 
         # 基底ディレクトリを作成
         self._base_dir.mkdir(parents=True, exist_ok=True)
@@ -166,6 +169,9 @@ class SessionManager:
         )
         session.files.append(session_file)
 
+        # インデックスに追加
+        self._file_index[file_id] = (session_id, session_file)
+
         return session_file
 
     def get_session_file(self, session_id: str, file_id: str) -> SessionFile | None:
@@ -215,6 +221,11 @@ class SessionManager:
 
                 # セッションから削除
                 session.files.pop(i)
+
+                # インデックスからも削除
+                if file_id in self._file_index:
+                    del self._file_index[file_id]
+
                 return True
 
         return False
@@ -251,6 +262,12 @@ class SessionManager:
         if session_id not in self._sessions:
             return False
 
+        # セッション内のファイルをインデックスから削除
+        session = self._sessions[session_id]
+        for file in session.files:
+            if file.id in self._file_index:
+                del self._file_index[file.id]
+
         # セッションディレクトリを削除
         session_dir = self._base_dir / session_id
         try:
@@ -262,6 +279,24 @@ class SessionManager:
         # メモリから削除
         del self._sessions[session_id]
         return True
+
+    def get_file_by_id(self, file_id: str) -> tuple[SessionFile | None, str | None]:
+        """
+        ファイルIDから直接ファイルを取得（高速検索）。
+
+        Args:
+            file_id: ファイルID
+
+        Returns:
+            (SessionFile, session_id) または (None, None)
+        """
+        if file_id in self._file_index:
+            session_id, session_file = self._file_index[file_id]
+            # セッションの最終アクセス時刻を更新
+            if session_id in self._sessions:
+                self._sessions[session_id].last_access = datetime.now()
+                return session_file, session_id
+        return None, None
 
     def get_session_stats(self) -> dict:
         """
@@ -282,6 +317,7 @@ class SessionManager:
             "total_files": total_files,
             "total_size_mb": total_size / 1024 / 1024,
             "base_dir": str(self._base_dir),
+            "file_index_size": len(self._file_index),
         }
 
 

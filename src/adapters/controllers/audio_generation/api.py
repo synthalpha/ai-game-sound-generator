@@ -7,7 +7,6 @@ FastAPI APIルート定義。
 import base64
 import os
 import uuid
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -215,24 +214,21 @@ async def download_music(
     download_id: str,
 ):
     """生成した音楽ファイルをダウンロード。"""
-    # まず、download_idから直接ファイルを探す（QRコード経由のアクセス用）
-    # すべてのセッションをチェック
-    for session_data in session_manager._sessions.values():
-        for file in session_data.files:
-            if file.id == download_id:
-                file_path = Path(file.path)
-                if file_path.exists():
-                    # ファイルの最終アクセス時刻を更新
-                    session_data.last_access = datetime.now()
-                    return FileResponse(
-                        path=file_path,
-                        filename=file.filename,
-                        media_type="audio/mpeg",
-                    )
-                else:
-                    # ファイルが物理的に存在しない場合
-                    session_manager.remove_file_from_session(session_data.session_id, download_id)
-                    break
+    # 高速インデックスを使用してファイルを検索
+    session_file, session_id = session_manager.get_file_by_id(download_id)
+
+    if session_file:
+        file_path = Path(session_file.path)
+        if file_path.exists():
+            return FileResponse(
+                path=file_path,
+                filename=session_file.filename,
+                media_type="audio/mpeg",
+            )
+        else:
+            # ファイルが物理的に存在しない場合
+            if session_id:
+                session_manager.remove_file_from_session(session_id, download_id)
 
     # ファイルが見つからない場合
     raise HTTPException(status_code=404, detail="ファイルが見つかりません")
