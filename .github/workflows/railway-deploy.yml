@@ -16,35 +16,41 @@ on:
           - develop
           - production
 
-env:
-  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to Railway
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
-    container: ghcr.io/railwayapp/cli:latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install Railway CLI
+        run: |
+          curl -fsSL https://railway.app/install.sh | sh
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-          AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
-          AUTH_ENABLED: ${{ secrets.AUTH_ENABLED }}
-          API_PORT: ${{ secrets.API_PORT }}
-          APP_HOST: ${{ secrets.APP_HOST }}
-          ELEVENLABS_BASE_URL: ${{ secrets.ELEVENLABS_BASE_URL }}
-          ELEVENLABS_TIMEOUT: ${{ secrets.ELEVENLABS_TIMEOUT }}
-          LOG_LEVEL: ${{ secrets.LOG_LEVEL }}
-          API_WORKERS: ${{ secrets.API_WORKERS }}
-          STORAGE_PATH: ${{ secrets.STORAGE_PATH }}
-          CACHE_ENABLED: ${{ secrets.CACHE_ENABLED }}
-          CACHE_TTL: ${{ secrets.CACHE_TTL }}
         run: |
-          # Railway CLIを使用してデプロイ（Dockerコンテナ内で実行）
+          # プロジェクトにリンク
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+
+          # 環境変数を設定
+          railway variables set ELEVENLABS_API_KEY="${{ secrets.ELEVENLABS_API_KEY }}"
+          railway variables set AUTH_PASSWORD="${{ secrets.AUTH_PASSWORD }}"
+          railway variables set AUTH_ENABLED="${{ secrets.AUTH_ENABLED }}"
+          railway variables set API_PORT="${{ secrets.API_PORT }}"
+          railway variables set APP_HOST="${{ secrets.APP_HOST }}"
+          railway variables set ELEVENLABS_BASE_URL="${{ secrets.ELEVENLABS_BASE_URL }}"
+          railway variables set ELEVENLABS_TIMEOUT="${{ secrets.ELEVENLABS_TIMEOUT }}"
+          railway variables set LOG_LEVEL="${{ secrets.LOG_LEVEL }}"
+          railway variables set API_WORKERS="${{ secrets.API_WORKERS }}"
+          railway variables set STORAGE_PATH="${{ secrets.STORAGE_PATH }}"
+          railway variables set CACHE_ENABLED="${{ secrets.CACHE_ENABLED }}"
+          railway variables set CACHE_TTL="${{ secrets.CACHE_TTL }}"
+
+          # デプロイ実行
           railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --detach
