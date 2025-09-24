@@ -241,16 +241,38 @@ class MonitoringService:
             alert_type: アラートタイプ（error, warning, info）
             message: アラートメッセージ
         """
+        from datetime import datetime
+
         emoji = {"error": "🚨", "warning": "⚠️", "info": "ℹ️"}.get(alert_type, "📢")
+        color = {"error": "#FF0000", "warning": "#FFA500", "info": "#0080FF"}.get(
+            alert_type, "#808080"
+        )
+
+        # タイムスタンプを追加
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         slack_message = {
-            "blocks": [
+            "attachments": [
                 {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"{emoji} *{alert_type.upper()}*: {message}",
-                    },
+                    "color": color,
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"{emoji} *{alert_type.upper()}*\n{message}",
+                            },
+                        },
+                        {
+                            "type": "context",
+                            "elements": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"⏰ {timestamp}",
+                                }
+                            ],
+                        },
+                    ],
                 }
             ]
         }
