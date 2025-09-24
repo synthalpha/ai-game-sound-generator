@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from src.adapters.controllers.audio_generation.api import router as api_router
+from src.utils.monitoring import monitoring_service, start_monitoring_tasks
 from src.utils.session_manager import session_manager
 
 # FastAPIアプリケーション初期化
@@ -51,6 +52,11 @@ async def startup_event():
     # セッションクリーンアップタスクを開始
     await session_manager.start_cleanup_task()
     print("Session cleanup task started")
+
+    # Slack通知が設定されている場合はモニタリングタスクを開始
+    if os.getenv("SLACK_WEBHOOK_URL"):
+        await start_monitoring_tasks()
+        await monitoring_service.send_alert("info", "AI Game Sound Generator が起動しました")
 
 
 @app.on_event("shutdown")

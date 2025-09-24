@@ -22,6 +22,7 @@ from src.di_container.config import ElevenLabsConfig
 from src.entities.music_generation import MusicGenerationRequest
 from src.entities.prompt import PromptType
 from src.usecases.prompt_generation.generate_prompt import GeneratePromptUseCase
+from src.utils.monitoring import monitoring_service
 from src.utils.session_manager import session_manager
 
 # 環境変数を読み込み
@@ -104,6 +105,7 @@ async def generate_music(
     if not is_demo_machine and os.getenv("ELEVENLABS_API_KEY"):
         is_allowed, error_message = session_manager.check_rate_limit(session_id)
         if not is_allowed:
+            monitoring_service.increment_rate_limited()
             return GenerateMusicResponse(
                 success=False,
                 prompt="",
@@ -214,6 +216,9 @@ async def generate_music(
 
         generation_time = time.time() - start_time
 
+        # 統計を更新
+        monitoring_service.increment_generation(is_demo=is_demo_machine)
+
         return GenerateMusicResponse(
             success=True,
             prompt=prompt.text,
@@ -227,6 +232,7 @@ async def generate_music(
 
     except Exception as e:
         generation_time = time.time() - start_time
+        monitoring_service.increment_error()
         return GenerateMusicResponse(
             success=False,
             prompt="",
@@ -265,6 +271,12 @@ async def cleanup_files():
     """期限切れセッションをクリーンアップ。"""
     deleted_count = await session_manager.cleanup_expired_sessions()
     return {"status": "cleaned", "deleted_sessions": deleted_count}
+
+
+@router.get("/monitoring/stats")
+async def get_monitoring_stats():
+    """モニタリング統計を取得。"""
+    return monitoring_service.get_system_stats()
 
 
 @router.get("/session/stats")
