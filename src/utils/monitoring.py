@@ -116,11 +116,47 @@ class MonitoringService:
 
     async def send_hourly_report(self):
         """1時間ごとのレポートを送信。"""
+        from sqlalchemy import Integer, and_, cast, func, select
+
+        from src.infrastructure.database import async_session_maker
+        from src.infrastructure.models import GenerationLog
+        from src.infrastructure.statistics_repository import StatisticsRepository
+
         stats = self.get_system_stats()
 
         # 前の1時間の統計
         now = datetime.now()
         hour_ago = now - timedelta(hours=1)
+
+        # DBから詳細統計を取得
+        db_stats = {}
+        try:
+            async with async_session_maker() as session:
+                repo = StatisticsRepository(session)
+
+                # 人気タグを取得（過去1時間）
+                popular_tags = await repo.get_popular_tags(hours=1, limit=5)
+
+                # 1時間の生成ログを集計
+                stmt = select(
+                    func.count().label("total"),
+                    func.sum(cast(GenerationLog.success, Integer)).label("success"),
+                    func.avg(GenerationLog.generation_time).label("avg_time"),
+                    func.avg(GenerationLog.tag_count).label("avg_tags"),
+                ).where(and_(GenerationLog.timestamp >= hour_ago, GenerationLog.timestamp <= now))
+                result = await session.execute(stmt)
+                hour_stats = result.one()
+
+                db_stats = {
+                    "total_generations_1h": hour_stats.total or 0,
+                    "success_count_1h": hour_stats.success or 0,
+                    "avg_generation_time_1h": round(hour_stats.avg_time or 0, 2),
+                    "avg_tags_selected": round(hour_stats.avg_tags or 0, 1),
+                    "popular_tags": popular_tags,
+                }
+        except Exception as e:
+            print(f"DB統計取得エラー: {e}")
+            db_stats = {}
 
         message = {
             "blocks": [
@@ -143,8 +179,18 @@ class MonitoringService:
                 },
                 {
                     "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"📊 *過去1時間の詳細*\n• 生成数: {db_stats.get('total_generations_1h', 0)}回\n• 成功率: {db_stats.get('success_count_1h', 0) * 100 // max(db_stats.get('total_generations_1h', 1), 1)}%\n• 平均生成時間: {db_stats.get('avg_generation_time_1h', 0)}秒\n• 平均タグ数: {db_stats.get('avg_tags_selected', 0)}個",
+                    },
+                },
+                {
+                    "type": "section",
                     "fields": [
-                        {"type": "mrkdwn", "text": f"*総生成数:*\n{stats['total_generations']}回"},
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*累計生成数:*\n{stats['total_generations']}回",
+                        },
                         {"type": "mrkdwn", "text": f"*デモ機:*\n{stats['demo_generations']}回"},
                         {"type": "mrkdwn", "text": f"*来場者:*\n{stats['visitor_generations']}回"},
                         {
@@ -168,6 +214,18 @@ class MonitoringService:
             ]
         }
 
+        # 人気タグがある場合は表示
+        if db_stats.get("popular_tags"):
+            all_tags = db_stats["popular_tags"].get("genre_tags", [])[:3]
+            if all_tags:
+                tag_text = ", ".join([f"{tag[0]} ({tag[1]}回)" for tag in all_tags])
+                message["blocks"].append(
+                    {
+                        "type": "section",
+                        "text": {"type": "mrkdwn", "text": f"🏆 *人気タグ:* {tag_text}"},
+                    }
+                )
+
         # エラーがある場合は警告
         if stats["error_count"] > 0:
             message["blocks"].append(
@@ -181,10 +239,70 @@ class MonitoringService:
 
     async def send_daily_summary(self):
         """日次サマリーレポートを送信。"""
+        from sqlalchemy import Integer, cast, func, select
+
+        from src.infrastructure.database import async_session_maker
+        from src.infrastructure.models import DownloadLog, GenerationLog
+        from src.infrastructure.statistics_repository import StatisticsRepository
+
         stats = self.get_system_stats()
 
-        # ピーク時間帯を特定
-        if self.hourly_stats:
+        # DBから24時間の詳細統計を取得
+        db_daily_stats = {}
+        try:
+            async with async_session_maker() as session:
+                repo = StatisticsRepository(session)
+                now = datetime.now()
+                day_ago = now - timedelta(days=1)
+
+                # 24時間の統計
+                stmt = select(
+                    func.count(GenerationLog.id).label("total"),
+                    func.sum(cast(GenerationLog.success, Integer)).label("success"),
+                    func.avg(GenerationLog.generation_time).label("avg_time"),
+                    func.avg(GenerationLog.tag_count).label("avg_tags"),
+                    func.count(GenerationLog.id.distinct())
+                    .filter(GenerationLog.is_demo_machine.is_(True))
+                    .label("demo_count"),
+                ).where(GenerationLog.timestamp >= day_ago)
+                result = await session.execute(stmt)
+                day_stats = result.one()
+
+                # ダウンロード統計
+                dl_stmt = select(
+                    func.count(DownloadLog.id).label("total_downloads"),
+                    func.sum(cast(DownloadLog.is_qr_download, Integer)).label("qr_downloads"),
+                ).where(DownloadLog.timestamp >= day_ago)
+                dl_result = await session.execute(dl_stmt)
+                dl_stats = dl_result.one()
+
+                # 時間帯別統計を取得
+                hourly_data = await repo.get_hourly_stats(now.date())
+
+                # 人気タグ（24時間）
+                popular_tags_24h = await repo.get_popular_tags(hours=24, limit=10)
+
+                db_daily_stats = {
+                    "total_24h": day_stats.total or 0,
+                    "success_24h": day_stats.success or 0,
+                    "avg_time_24h": round(day_stats.avg_time or 0, 2),
+                    "avg_tags_24h": round(day_stats.avg_tags or 0, 1),
+                    "demo_count_24h": day_stats.demo_count or 0,
+                    "total_downloads": dl_stats.total_downloads or 0,
+                    "qr_downloads": dl_stats.qr_downloads or 0,
+                    "hourly_data": hourly_data,
+                    "popular_tags": popular_tags_24h,
+                }
+        except Exception as e:
+            print(f"日次統計DB取得エラー: {e}")
+            db_daily_stats = {}
+
+        # ピーク時間帯を特定（DB統計から）
+        if db_daily_stats.get("hourly_data"):
+            peak_data = max(db_daily_stats["hourly_data"], key=lambda x: x["total"])
+            peak_hour = peak_data["hour"]
+            peak_count = peak_data["total"]
+        elif self.hourly_stats:
             peak_hour = max(self.hourly_stats, key=self.hourly_stats.get)
             peak_count = self.hourly_stats[peak_hour]
         else:
@@ -207,10 +325,21 @@ class MonitoringService:
                 {
                     "type": "section",
                     "fields": [
-                        {"type": "mrkdwn", "text": f"*総生成数:*\n{stats['total_generations']}回"},
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*24時間生成数:*\n{db_daily_stats.get('total_24h', 0)}回",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*成功率:*\n{db_daily_stats.get('success_24h', 0) * 100 // max(db_daily_stats.get('total_24h', 1), 1)}%",
+                        },
                         {
                             "type": "mrkdwn",
                             "text": f"*ピーク時間帯:*\n{peak_hour}時台 ({peak_count}回)",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*平均生成時間:*\n{db_daily_stats.get('avg_time_24h', 0)}秒",
                         },
                     ],
                 },
@@ -218,7 +347,14 @@ class MonitoringService:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"*生成内訳:*\n• デモ機: {stats['demo_generations']}回 ({stats['demo_generations'] * 100 // max(stats['total_generations'], 1)}%)\n• 来場者: {stats['visitor_generations']}回 ({stats['visitor_generations'] * 100 // max(stats['total_generations'], 1)}%)",
+                        "text": f"📥 *ダウンロード統計:*\n• 総ダウンロード: {db_daily_stats.get('total_downloads', 0)}回\n• QRコード経由: {db_daily_stats.get('qr_downloads', 0)}回 ({db_daily_stats.get('qr_downloads', 0) * 100 // max(db_daily_stats.get('total_downloads', 1), 1)}%)",
+                    },
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*生成内訳:*\n• デモ機: {db_daily_stats.get('demo_count_24h', 0)}回\n• 来場者: {db_daily_stats.get('total_24h', 0) - db_daily_stats.get('demo_count_24h', 0)}回\n• 平均タグ選択数: {db_daily_stats.get('avg_tags_24h', 0)}個",
                     },
                 },
                 {
@@ -230,6 +366,23 @@ class MonitoringService:
                 },
             ]
         }
+
+        # 人気タグトップ5を追加
+        if db_daily_stats.get("popular_tags"):
+            all_tags = db_daily_stats["popular_tags"].get("genre_tags", [])[:5]
+            if all_tags:
+                tag_list = "\n".join(
+                    [f"{i + 1}. {tag[0]} ({tag[1]}回)" for i, tag in enumerate(all_tags)]
+                )
+                message["blocks"].append(
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"🏆 *人気タグ TOP5:*\n{tag_list}",
+                        },
+                    }
+                )
 
         await self.send_slack_notification(message)
 
