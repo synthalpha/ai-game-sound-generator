@@ -36,7 +36,7 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           # プロジェクトにリンク
-          railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }}
 
           # 環境変数を設定
           railway variables set ELEVENLABS_API_KEY="${{ secrets.ELEVENLABS_API_KEY }}"
