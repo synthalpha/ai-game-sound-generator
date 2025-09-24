@@ -7,6 +7,7 @@ FastAPI APIルート定義。
 import base64
 import os
 import uuid
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -212,29 +213,29 @@ async def generate_music(
 @router.get("/download/{download_id}")
 async def download_music(
     download_id: str,
-    http_request: Request,
-    session: str | None = Cookie(None),
 ):
     """生成した音楽ファイルをダウンロード。"""
-    session_id = get_session_id(http_request, session)
+    # まず、download_idから直接ファイルを探す（QRコード経由のアクセス用）
+    # すべてのセッションをチェック
+    for session_data in session_manager._sessions.values():
+        for file in session_data.files:
+            if file.id == download_id:
+                file_path = Path(file.path)
+                if file_path.exists():
+                    # ファイルの最終アクセス時刻を更新
+                    session_data.last_access = datetime.now()
+                    return FileResponse(
+                        path=file_path,
+                        filename=file.filename,
+                        media_type="audio/mpeg",
+                    )
+                else:
+                    # ファイルが物理的に存在しない場合
+                    session_manager.remove_file_from_session(session_data.session_id, download_id)
+                    break
 
-    # セッションからファイルを取得
-    session_file = session_manager.get_session_file(session_id, download_id)
-    if not session_file:
-        raise HTTPException(status_code=404, detail="ファイルが見つかりません")
-
-    # ファイルが存在するか確認
-    file_path = Path(session_file.path)
-    if not file_path.exists():
-        # ファイルが物理的に存在しない場合はセッションからも削除
-        session_manager.remove_file_from_session(session_id, download_id)
-        raise HTTPException(status_code=404, detail="ファイルが見つかりません")
-
-    return FileResponse(
-        path=file_path,
-        filename=session_file.filename,
-        media_type="audio/mpeg",
-    )
+    # ファイルが見つからない場合
+    raise HTTPException(status_code=404, detail="ファイルが見つかりません")
 
 
 @router.delete("/cleanup")
