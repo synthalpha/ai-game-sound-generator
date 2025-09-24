@@ -92,6 +92,29 @@ async def generate_music(
     start_time = time.time()
     session_id = get_session_id(http_request, session)
 
+    # デモ機のIPアドレスリストを環境変数から取得
+    demo_ip_list = os.getenv("DEMO_IP_ADDRESSES", "").strip()
+    demo_ips = [ip.strip() for ip in demo_ip_list.split(",") if ip.strip()]
+
+    # クライアントIPアドレスを取得
+    client_ip = http_request.client.host if http_request.client else "unknown"
+
+    # デモ機判定とレート制限チェック
+    is_demo_machine = client_ip in demo_ips
+    if not is_demo_machine and os.getenv("ELEVENLABS_API_KEY"):
+        is_allowed, error_message = session_manager.check_rate_limit(session_id)
+        if not is_allowed:
+            return GenerateMusicResponse(
+                success=False,
+                prompt="",
+                error_message=error_message,
+                generation_time=0,
+            )
+
+    # デバッグ用ログ（本番環境では削除推奨）
+    if is_demo_machine:
+        print(f"Demo machine access from IP: {client_ip}")
+
     try:
         # リポジトリとユースケース初期化
         tag_repo = TagRepository()
@@ -140,6 +163,9 @@ async def generate_music(
                 duration_seconds=request.duration_seconds,
                 generation_time=generation_time,
             )
+
+        # 生成統計を更新
+        session_manager.update_generation_stats(session_id)
 
         # 実際の音楽生成
         config = ElevenLabsConfig(api_key=api_key)

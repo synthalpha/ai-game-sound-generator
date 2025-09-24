@@ -28,6 +28,10 @@ class SessionData(BaseModel):
     session_id: str
     created_at: datetime
     last_access: datetime
+    last_generation: datetime | None = None  # 最後の生成時刻
+    generation_count_burst: int = 0  # 短期間（5分）の生成回数
+    generation_count_hour: int = 0  # 1時間の生成回数
+    generation_timestamps: list[datetime] = []  # 生成履歴（時刻リスト）
     files: list[SessionFile] = []
     max_files: int = 10  # セッションあたりの最大ファイル数
 
@@ -45,6 +49,9 @@ class SessionManager:
         session_ttl_minutes: int = 10,
         max_file_size_mb: int = 50,
         cleanup_interval_minutes: int = 10,
+        rate_limit_per_hour: int = 10,  # 1時間あたりの最大生成回数
+        burst_limit: int = 3,  # 短期間（5分）での連続生成上限
+        min_generation_interval_seconds: int = 5,  # 最小生成間隔（秒）
     ):
         """
         初期化。
@@ -54,11 +61,17 @@ class SessionManager:
             session_ttl_minutes: セッションの有効期限（分）
             max_file_size_mb: ファイルの最大サイズ（MB）
             cleanup_interval_minutes: クリーンアップ実行間隔（分）
+            rate_limit_per_hour: 1時間あたりの最大生成回数
+            burst_limit: 短期間（5分）での連続生成上限
+            min_generation_interval_seconds: 最小生成間隔（秒）
         """
         self._base_dir = base_dir
         self._session_ttl = timedelta(minutes=session_ttl_minutes)
         self._max_file_size = max_file_size_mb * 1024 * 1024  # バイトに変換
         self._cleanup_interval = cleanup_interval_minutes * 60  # 秒に変換
+        self._rate_limit_per_hour = rate_limit_per_hour
+        self._burst_limit = burst_limit
+        self._min_generation_interval = timedelta(seconds=min_generation_interval_seconds)
         self._sessions: dict[str, SessionData] = {}
         self._file_index: dict[
             str, tuple[str, SessionFile]
@@ -279,6 +292,75 @@ class SessionManager:
         # メモリから削除
         del self._sessions[session_id]
         return True
+
+    def check_rate_limit(self, session_id: str) -> tuple[bool, str]:
+        """
+        レート制限をチェック。
+
+        Args:
+            session_id: セッションID
+
+        Returns:
+            (制限内ならTrue, エラーメッセージ)
+        """
+        session = self.get_or_create_session(session_id)
+        now = datetime.now()
+
+        # 古いタイムスタンプを削除（1時間より前のもの）
+        session.generation_timestamps = [
+            ts for ts in session.generation_timestamps if now - ts < timedelta(hours=1)
+        ]
+
+        # 最小生成間隔チェック（5秒）
+        if session.last_generation:
+            time_since_last = now - session.last_generation
+            if time_since_last < self._min_generation_interval:
+                wait_seconds = (self._min_generation_interval - time_since_last).total_seconds()
+                return False, f"生成間隔が短すぎます。あと{int(wait_seconds)}秒お待ちください。"
+
+        # 5分以内の生成回数チェック（バースト制限：3回まで）
+        recent_5min = [
+            ts for ts in session.generation_timestamps if now - ts < timedelta(minutes=5)
+        ]
+        if len(recent_5min) >= self._burst_limit:
+            oldest_5min = min(recent_5min)
+            wait_time = oldest_5min + timedelta(minutes=5) - now
+            wait_minutes = int(wait_time.total_seconds() / 60) + 1
+            return (
+                False,
+                f"短時間での生成上限（5分間で{self._burst_limit}回）に達しました。あと{wait_minutes}分お待ちください。",
+            )
+
+        # 1時間の生成回数チェック（10回まで）
+        if len(session.generation_timestamps) >= self._rate_limit_per_hour:
+            oldest_hour = min(session.generation_timestamps)
+            wait_time = oldest_hour + timedelta(hours=1) - now
+            wait_minutes = int(wait_time.total_seconds() / 60) + 1
+            return (
+                False,
+                f"1時間の生成上限（{self._rate_limit_per_hour}回）に達しました。あと{wait_minutes}分お待ちください。",
+            )
+
+        return True, ""
+
+    def update_generation_stats(self, session_id: str):
+        """
+        生成統計を更新。
+
+        Args:
+            session_id: セッションID
+        """
+        session = self.get_or_create_session(session_id)
+        now = datetime.now()
+
+        # タイムスタンプを追加
+        session.generation_timestamps.append(now)
+        session.last_generation = now
+
+        # 古いタイムスタンプを削除（1時間より前のもの）
+        session.generation_timestamps = [
+            ts for ts in session.generation_timestamps if now - ts < timedelta(hours=1)
+        ]
 
     def get_file_by_id(self, file_id: str) -> tuple[SessionFile | None, str | None]:
         """
