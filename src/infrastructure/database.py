@@ -54,6 +54,9 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 async def init_db():
     """データベースの初期化。"""
+    # モデルをインポートしてメタデータに登録
+    from src.infrastructure import models  # noqa: F401
+
     async with engine.begin() as conn:
         # テーブル作成
         await conn.run_sync(Base.metadata.create_all)

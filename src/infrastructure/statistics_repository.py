@@ -71,6 +71,7 @@ class StatisticsRepository:
             log = GenerationLog(
                 session_id=session_id,
                 request_id=request_id,
+                timestamp=datetime.utcnow(),
                 ip_address=ip_address,
                 is_demo_machine=is_demo,
                 genre_tags=request_data.get("genre_tags", []),
@@ -138,6 +139,7 @@ class StatisticsRepository:
             log = DownloadLog(
                 download_id=download_id,
                 session_id=session_id,
+                timestamp=datetime.utcnow(),  # 明示的にUTC時刻を設定
                 generation_request_id=request_id,
                 ip_address=ip_address,
                 user_agent=user_agent[:256] if user_agent else None,  # 長さ制限
@@ -185,6 +187,8 @@ class StatisticsRepository:
             # 新規セッション
             session = SessionLog(
                 session_id=session_id,
+                first_access=datetime.utcnow(),  # 明示的にUTC時刻を設定
+                last_access=datetime.utcnow(),  # 明示的にUTC時刻を設定
                 ip_address=ip_address,
                 is_demo_machine=is_demo,
                 total_generations=1,
@@ -194,7 +198,7 @@ class StatisticsRepository:
             self.session.add(session)
         else:
             # 既存セッション更新
-            session.last_access = datetime.now()
+            session.last_access = datetime.utcnow()  # UTC時刻を使用
             session.total_generations += 1
             if is_success:
                 session.successful_generations += 1
@@ -309,6 +313,7 @@ class StatisticsRepository:
             各種メトリクス値
         """
         metrics = SystemMetrics(
+            timestamp=datetime.utcnow(),
             total_requests=total_requests,
             successful_requests=successful_requests,
             failed_requests=failed_requests,

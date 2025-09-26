@@ -6,7 +6,7 @@
 
 import asyncio
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from typing import Any
 
 import aiohttp
@@ -135,6 +135,10 @@ class MonitoringService:
         now = datetime.now(JST)
         hour_ago = now - timedelta(hours=1)
 
+        # データベース検索用にUTC時刻に変換
+        now_utc = now.astimezone(UTC).replace(tzinfo=None)
+        hour_ago_utc = hour_ago.astimezone(UTC).replace(tzinfo=None)
+
         # DBから詳細統計を取得
         db_stats = {}
         try:
@@ -151,7 +155,11 @@ class MonitoringService:
                     func.avg(GenerationLog.generation_time).label("avg_time"),
                     func.avg(GenerationLog.tag_count).label("avg_tags"),
                     func.sum(cast(GenerationLog.is_demo_machine, Integer)).label("demo_count"),
-                ).where(and_(GenerationLog.timestamp >= hour_ago, GenerationLog.timestamp <= now))
+                ).where(
+                    and_(
+                        GenerationLog.timestamp >= hour_ago_utc, GenerationLog.timestamp <= now_utc
+                    )
+                )
                 result = await session.execute(stmt)
                 hour_stats = result.one()
 
@@ -269,6 +277,9 @@ class MonitoringService:
                 now = datetime.now(JST)
                 day_ago = now - timedelta(days=1)
 
+                # データベース検索用にUTC時刻に変換
+                day_ago_utc = day_ago.astimezone(UTC).replace(tzinfo=None)
+
                 # 24時間の統計
                 stmt = select(
                     func.count(GenerationLog.id).label("total"),
@@ -276,7 +287,7 @@ class MonitoringService:
                     func.avg(GenerationLog.generation_time).label("avg_time"),
                     func.avg(GenerationLog.tag_count).label("avg_tags"),
                     func.sum(cast(GenerationLog.is_demo_machine, Integer)).label("demo_count"),
-                ).where(GenerationLog.timestamp >= day_ago)
+                ).where(GenerationLog.timestamp >= day_ago_utc)
                 result = await session.execute(stmt)
                 day_stats = result.one()
 
@@ -284,7 +295,7 @@ class MonitoringService:
                 dl_stmt = select(
                     func.count(DownloadLog.id).label("total_downloads"),
                     func.sum(cast(DownloadLog.is_qr_download, Integer)).label("qr_downloads"),
-                ).where(DownloadLog.timestamp >= day_ago)
+                ).where(DownloadLog.timestamp >= day_ago_utc)
                 dl_result = await session.execute(dl_stmt)
                 dl_stats = dl_result.one()
 
