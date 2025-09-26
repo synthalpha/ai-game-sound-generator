@@ -150,15 +150,22 @@ class MonitoringService:
                     func.sum(cast(GenerationLog.success, Integer)).label("success"),
                     func.avg(GenerationLog.generation_time).label("avg_time"),
                     func.avg(GenerationLog.tag_count).label("avg_tags"),
+                    func.sum(cast(GenerationLog.is_demo_machine, Integer)).label("demo_count"),
                 ).where(and_(GenerationLog.timestamp >= hour_ago, GenerationLog.timestamp <= now))
                 result = await session.execute(stmt)
                 hour_stats = result.one()
+
+                # 時間帯別の詳細（例：13時〜14時のデータ）
+                current_hour = now.hour
+                hour_label = f"{current_hour}時〜{(current_hour + 1) % 24}時"
 
                 db_stats = {
                     "total_generations_1h": hour_stats.total or 0,
                     "success_count_1h": hour_stats.success or 0,
                     "avg_generation_time_1h": round(hour_stats.avg_time or 0, 2),
                     "avg_tags_selected": round(hour_stats.avg_tags or 0, 1),
+                    "demo_count_1h": hour_stats.demo_count or 0,
+                    "hour_label": hour_label,
                     "popular_tags": popular_tags,
                 }
         except Exception as e:
@@ -179,7 +186,7 @@ class MonitoringService:
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f"*期間:*\n{hour_ago.strftime('%H:%M')} - {now.strftime('%H:%M')}",
+                            "text": f"*期間:*\n{db_stats.get('hour_label', f'{hour_ago.strftime("%H:%M")} - {now.strftime("%H:%M")}')}",
                         },
                         {"type": "mrkdwn", "text": f"*稼働時間:*\n{stats['uptime_hours']}時間"},
                     ],
@@ -188,7 +195,7 @@ class MonitoringService:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"📊 *過去1時間の詳細*\n• 生成数: {db_stats.get('total_generations_1h', 0)}回\n• 成功率: {db_stats.get('success_count_1h', 0) * 100 // max(db_stats.get('total_generations_1h', 1), 1)}%\n• 平均生成時間: {db_stats.get('avg_generation_time_1h', 0)}秒\n• 平均タグ数: {db_stats.get('avg_tags_selected', 0)}個",
+                        "text": f"📊 *過去1時間の詳細（DB記録）*\n• 生成数: {db_stats.get('total_generations_1h', 0)}回\n• 成功率: {db_stats.get('success_count_1h', 0) * 100 // max(db_stats.get('total_generations_1h', 1), 1)}%\n• 平均生成時間: {db_stats.get('avg_generation_time_1h', 0)}秒\n• 平均タグ数: {db_stats.get('avg_tags_selected', 0)}個\n• デモ機生成: {db_stats.get('demo_count_1h', 0)}回",
                     },
                 },
                 {
@@ -446,13 +453,21 @@ async def start_monitoring_tasks():
     """モニタリングタスクを開始。"""
 
     async def hourly_task():
-        """1時間ごとのタスク。"""
+        """1時間ごとのタスク（9:00-19:00のみ）。"""
         while True:
             await asyncio.sleep(3600)  # 1時間
-            try:
-                await monitoring_service.send_hourly_report()
-            except Exception as e:
-                print(f"定期レポートエラー: {e}")
+
+            # 現在時刻をチェック（日本時間）
+            now = datetime.now(JST)
+
+            # 9:00-19:00の間のみ通知を送信
+            if 9 <= now.hour < 19:
+                try:
+                    await monitoring_service.send_hourly_report()
+                except Exception as e:
+                    print(f"定期レポートエラー: {e}")
+            else:
+                print(f"通知時間外: {now.hour}時（9:00-19:00のみ送信）")
 
     async def daily_task():
         """日次タスク。"""
