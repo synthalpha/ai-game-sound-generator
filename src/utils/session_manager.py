@@ -293,16 +293,21 @@ class SessionManager:
         del self._sessions[session_id]
         return True
 
-    def check_rate_limit(self, session_id: str) -> tuple[bool, str]:
+    def check_rate_limit(self, session_id: str, enabled: bool = True) -> tuple[bool, str]:
         """
         レート制限をチェック。
 
         Args:
             session_id: セッションID
+            enabled: レート制限が有効かどうか
 
         Returns:
             (制限内ならTrue, エラーメッセージ)
         """
+        # レート制限が無効の場合は常に許可
+        if not enabled:
+            return True, ""
+
         session = self.get_or_create_session(session_id)
         now = datetime.now()
 

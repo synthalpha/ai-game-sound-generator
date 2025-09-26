@@ -106,8 +106,13 @@ async def generate_music(
 
     # デモ機判定とレート制限チェック
     is_demo_machine = client_ip in demo_ips
+    rate_limit_enabled = os.getenv("RATE_LIMIT_ENABLED", "true").lower() == "true"
+
+    # レート制限チェック（デモ機は常に除外）
     if not is_demo_machine and os.getenv("ELEVENLABS_API_KEY"):
-        is_allowed, error_message = session_manager.check_rate_limit(session_id)
+        is_allowed, error_message = session_manager.check_rate_limit(
+            session_id, enabled=rate_limit_enabled
+        )
         if not is_allowed:
             monitoring_service.increment_rate_limited()
 
