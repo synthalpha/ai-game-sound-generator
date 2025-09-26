@@ -42,6 +42,9 @@ RUN if [ "$BUILD_ENV" = "development" ]; then \
 
 COPY . .
 
+# logsディレクトリを作成
+RUN mkdir -p /app/logs && chmod 777 /app/logs
+
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH" \

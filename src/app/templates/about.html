@@ -174,6 +174,197 @@
             height: 2px;
             background: #000;
         }
+
+        /* Alpine.jsのcloakディレクティブ用 */
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* ハンバーガーメニュー */
+        .hamburger-menu {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+
+        .hamburger-menu span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #000;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s;
+        }
+
+        .hamburger-menu span:nth-child(1) {
+            top: 12px;
+        }
+
+        .hamburger-menu span:nth-child(2) {
+            top: 19px;
+        }
+
+        .hamburger-menu span:nth-child(3) {
+            top: 26px;
+        }
+
+        .hamburger-menu.active span:nth-child(1) {
+            top: 19px;
+            transform: translateX(-50%) rotate(45deg);
+        }
+
+        .hamburger-menu.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger-menu.active span:nth-child(3) {
+            top: 19px;
+            transform: translateX(-50%) rotate(-45deg);
+        }
+
+        /* モバイルメニュー */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: -100%;
+            width: 280px;
+            height: calc(100vh - 80px);
+            background: #fff;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s;
+            z-index: 99;
+            overflow-y: auto;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 98;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+        }
+
+        .mobile-menu-content {
+            padding: 30px 20px;
+        }
+
+        .mobile-menu-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .mobile-menu-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .mobile-menu-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #999;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .mobile-menu-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .mobile-menu-link {
+            display: block;
+            padding: 12px 15px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+            letter-spacing: 0.04em;
+        }
+
+        .mobile-menu-link:hover {
+            background: #f5f5f5;
+        }
+
+        .mobile-menu-link.active {
+            background: #000;
+            color: #fff;
+        }
+
+        .mobile-logout-button {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            background: #333;
+            border: none;
+            border-radius: 25px;
+            text-align: center;
+            text-decoration: none;
+            letter-spacing: 0.08em;
+            transition: background 0.2s;
+        }
+
+        .mobile-logout-button:hover {
+            background: #000;
+        }
+
+        .mobile-language-toggle {
+            display: flex;
+            background: #f5f5f5;
+            border-radius: 25px;
+            padding: 4px;
+            width: 100%;
+        }
+
+        .mobile-language-btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: all 0.2s;
+            letter-spacing: 0.05em;
+        }
+
+        .mobile-language-btn.active {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
         
         /* メインコンテンツ */
         .main-content {
@@ -312,16 +503,32 @@
         }
         
         @media (max-width: 768px) {
+            .hamburger-menu {
+                display: block;
+            }
+
+            .header-nav {
+                display: none;
+            }
+
+            .mobile-menu,
+            .mobile-menu-overlay {
+                display: block;
+            }
+
             .header {
                 padding: 0 20px;
+                justify-content: space-between;
             }
-            
+
+            .header-content {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
             .header h1 {
                 font-size: 15px;
-            }
-            
-            .header-nav {
-                gap: 30px;
             }
             
             .nav-link {
@@ -357,9 +564,14 @@
             }
             
             .header-nav {
-                gap: 20px;
+                display: none;
             }
-            
+
+            .hamburger-menu {
+                width: 36px;
+                height: 36px;
+            }
+
             .nav-link {
                 font-size: 12px;
                 padding: 6px 0;
@@ -369,7 +581,7 @@
 </head>
 <body x-data="{ lang: localStorage.getItem('language') || 'ja' }"
       x-init="window.addEventListener('language-changed', (e) => lang = e.detail)">
-    <div class="header">
+    <div class="header" x-data="{ mobileMenuOpen: false }">
         <div class="header-content">
             <img src="/static/images/fimmigrm_logo_2025_01.svg" alt="Fimmgrm Logo" class="header-logo">
             <h1>
@@ -377,6 +589,15 @@
                 <span class="header-title-sub">GENERATOR</span>
             </h1>
         </div>
+
+        <!-- ハンバーガーメニューボタン -->
+        <button class="hamburger-menu" @click="mobileMenuOpen = !mobileMenuOpen" :class="{ 'active': mobileMenuOpen }">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <!-- デスクトップナビゲーション -->
         <nav class="header-nav">
             <a href="/" class="nav-link"
                x-text="lang === 'ja' ? 'トラック生成' : 'Track Generation'">トラック生成</a>
@@ -390,6 +611,51 @@
                 <button @click="lang = 'en'" :class="{'active': lang === 'en'}" class="language-btn">EN</button>
             </div>
         </nav>
+
+        <!-- モバイルメニューオーバーレイ -->
+        <div class="mobile-menu-overlay" :class="{ 'active': mobileMenuOpen }" @click="mobileMenuOpen = false" x-show="mobileMenuOpen" x-cloak></div>
+
+        <!-- モバイルメニュー -->
+        <div class="mobile-menu" :class="{ 'active': mobileMenuOpen }">
+            <div class="mobile-menu-content">
+                <!-- ナビゲーション -->
+                <div class="mobile-menu-section">
+                    <div class="mobile-menu-label" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+                         x-text="lang === 'ja' ? 'メニュー' : 'MENU'"
+                         @language-changed.window="lang = $event.detail">メニュー</div>
+                    <div class="mobile-menu-nav">
+                        <a href="/" class="mobile-menu-link"
+                           x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+                           x-text="lang === 'ja' ? 'トラック生成' : 'Track Generation'"
+                           @language-changed.window="lang = $event.detail">トラック生成</a>
+                        <a href="/about" class="mobile-menu-link active"
+                           x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+                           x-text="lang === 'ja' ? '特徴' : 'Features'"
+                           @language-changed.window="lang = $event.detail">特徴</a>
+                    </div>
+                </div>
+
+                <!-- 言語切り替え -->
+                <div class="mobile-menu-section">
+                    <div class="mobile-menu-label" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+                         x-text="lang === 'ja' ? '言語' : 'LANGUAGE'"
+                         @language-changed.window="lang = $event.detail">言語</div>
+                    <div class="mobile-language-toggle" x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+                         x-init="$watch('lang', value => { localStorage.setItem('language', value); window.dispatchEvent(new CustomEvent('language-changed', { detail: value })); })">
+                        <button @click="lang = 'ja'" :class="{'active': lang === 'ja'}" class="mobile-language-btn">日本語</button>
+                        <button @click="lang = 'en'" :class="{'active': lang === 'en'}" class="mobile-language-btn">English</button>
+                    </div>
+                </div>
+
+                <!-- ログアウト -->
+                <div class="mobile-menu-section">
+                    <a href="/logout" class="mobile-logout-button"
+                       x-data="{ lang: localStorage.getItem('language') || 'ja' }"
+                       x-text="lang === 'ja' ? 'ログアウト' : 'Logout'"
+                       @language-changed.window="lang = $event.detail">ログアウト</a>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div class="main-content">
