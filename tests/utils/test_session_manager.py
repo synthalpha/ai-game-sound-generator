@@ -33,12 +33,17 @@ def session_manager(temp_dir):
 
 def test_get_or_create_session(session_manager):
     """セッションの作成と取得をテスト。"""
+    import time
+
     session_id = "test_session_1"
 
     # 新規セッション作成
     session1 = session_manager.get_or_create_session(session_id)
     assert session1.session_id == session_id
     assert len(session1.files) == 0
+
+    # 少し待機してから再取得（時刻が変わるように）
+    time.sleep(0.01)
 
     # 同じセッションを再取得
     session2 = session_manager.get_or_create_session(session_id)
