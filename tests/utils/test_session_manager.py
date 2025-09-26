@@ -25,7 +25,7 @@ def session_manager(temp_dir):
     """テスト用のセッションマネージャー。"""
     return SessionManager(
         base_dir=temp_dir,
-        session_ttl_hours=1,
+        session_ttl_minutes=60,
         max_file_size_mb=10,
         cleanup_interval_minutes=1,
     )
