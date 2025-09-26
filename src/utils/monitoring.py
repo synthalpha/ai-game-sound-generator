@@ -25,6 +25,7 @@ class MonitoringService:
             slack_webhook_url: Slack Webhook URL
         """
         self.slack_webhook_url = slack_webhook_url or os.getenv("SLACK_WEBHOOK_URL")
+        self.slack_enabled = os.getenv("SLACK_ENABLED", "true").lower() == "true"
         self.start_time = datetime.now()
         self.generation_count = 0
         self.error_count = 0
@@ -44,6 +45,10 @@ class MonitoringService:
         Returns:
             送信成功の場合True
         """
+        # Slack通知が無効の場合
+        if not self.slack_enabled:
+            return False
+
         if not self.slack_webhook_url:
             print("Slack Webhook URLが設定されていません")
             return False
