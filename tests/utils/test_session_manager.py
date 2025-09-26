@@ -42,13 +42,17 @@ def test_get_or_create_session(session_manager):
     assert session1.session_id == session_id
     assert len(session1.files) == 0
 
+    # 最初のアクセス時刻を保存
+    first_access_time = session1.last_access
+
     # 少し待機してから再取得（時刻が変わるように）
     time.sleep(0.01)
 
     # 同じセッションを再取得
     session2 = session_manager.get_or_create_session(session_id)
     assert session2.session_id == session_id
-    assert session2.last_access > session1.last_access
+    # 同じオブジェクトが返されるが、last_accessは更新されているはず
+    assert session2.last_access > first_access_time
 
 
 def test_add_file_to_session(session_manager, temp_dir):
