@@ -6,12 +6,14 @@
 
 import asyncio
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import aiohttp
 
 from src.utils.session_manager import session_manager
+
+JST = timezone(timedelta(hours=9))
 
 
 class MonitoringService:
@@ -26,7 +28,7 @@ class MonitoringService:
         """
         self.slack_webhook_url = slack_webhook_url or os.getenv("SLACK_WEBHOOK_URL")
         self.slack_enabled = os.getenv("SLACK_ENABLED", "true").lower() == "true"
-        self.start_time = datetime.now()
+        self.start_time = datetime.now(JST)
         self.generation_count = 0
         self.error_count = 0
         self.demo_generation_count = 0
@@ -74,7 +76,7 @@ class MonitoringService:
             self.demo_generation_count += 1
 
         # 時間帯別カウント
-        current_hour = datetime.now().hour
+        current_hour = datetime.now(JST).hour
         if current_hour not in self.hourly_stats:
             self.hourly_stats[current_hour] = 0
         self.hourly_stats[current_hour] += 1
@@ -94,7 +96,7 @@ class MonitoringService:
         Returns:
             統計情報
         """
-        uptime = datetime.now() - self.start_time
+        uptime = datetime.now(JST) - self.start_time
         uptime_hours = uptime.total_seconds() / 3600
 
         # セッション統計
@@ -130,7 +132,7 @@ class MonitoringService:
         stats = self.get_system_stats()
 
         # 前の1時間の統計
-        now = datetime.now()
+        now = datetime.now(JST)
         hour_ago = now - timedelta(hours=1)
 
         # DBから詳細統計を取得
@@ -257,7 +259,7 @@ class MonitoringService:
         try:
             async with async_session_maker() as session:
                 repo = StatisticsRepository(session)
-                now = datetime.now()
+                now = datetime.now(JST)
                 day_ago = now - timedelta(days=1)
 
                 # 24時間の統計
@@ -266,9 +268,7 @@ class MonitoringService:
                     func.sum(cast(GenerationLog.success, Integer)).label("success"),
                     func.avg(GenerationLog.generation_time).label("avg_time"),
                     func.avg(GenerationLog.tag_count).label("avg_tags"),
-                    func.count(GenerationLog.id.distinct())
-                    .filter(GenerationLog.is_demo_machine.is_(True))
-                    .label("demo_count"),
+                    func.sum(cast(GenerationLog.is_demo_machine, Integer)).label("demo_count"),
                 ).where(GenerationLog.timestamp >= day_ago)
                 result = await session.execute(stmt)
                 day_stats = result.one()
@@ -324,7 +324,7 @@ class MonitoringService:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"*日付:* {datetime.now().strftime('%Y年%m月%d日')}",
+                        "text": f"*日付:* {datetime.now(JST).strftime('%Y年%m月%d日')}",
                     },
                 },
                 {
@@ -407,7 +407,7 @@ class MonitoringService:
         )
 
         # タイムスタンプを追加
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S JST")
 
         slack_message = {
             "attachments": [
@@ -457,16 +457,15 @@ async def start_monitoring_tasks():
     async def daily_task():
         """日次タスク。"""
         while True:
-            # 次の午前9時まで待機
-            now = datetime.now()
-            tomorrow = now + timedelta(days=1)
-            next_9am = tomorrow.replace(hour=9, minute=0, second=0, microsecond=0)
-            if now.hour >= 9:
-                next_9am = next_9am
-            else:
-                next_9am = now.replace(hour=9, minute=0, second=0, microsecond=0)
+            now = datetime.now(JST)
 
-            wait_seconds = (next_9am - now).total_seconds()
+            if now.hour < 21:
+                next_9pm = now.replace(hour=21, minute=0, second=0, microsecond=0)
+            else:
+                tomorrow = now + timedelta(days=1)
+                next_9pm = tomorrow.replace(hour=21, minute=0, second=0, microsecond=0)
+
+            wait_seconds = (next_9pm - now).total_seconds()
             await asyncio.sleep(wait_seconds)
 
             try:
