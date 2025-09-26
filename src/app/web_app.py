@@ -16,7 +16,9 @@ from fastapi.templating import Jinja2Templates
 
 from src.adapters.controllers.audio_generation.api import router as api_router
 from src.infrastructure.database import close_db, init_db
-from src.utils.monitoring import monitoring_service, start_monitoring_tasks
+from src.utils.monitoring import (
+    start_monitoring_tasks,
+)  # monitoring_service はデプロイ通知無効化のため未使用
 from src.utils.session_manager import session_manager
 
 # FastAPIアプリケーション初期化
@@ -50,7 +52,7 @@ app.include_router(api_router)
 @app.on_event("startup")
 async def startup_event():
     """アプリケーション起動時の処理。"""
-    import platform
+    # import platform  # デプロイ通知無効化のため未使用
 
     # データベースの初期化
     await init_db()
@@ -64,34 +66,34 @@ async def startup_event():
     if os.getenv("SLACK_WEBHOOK_URL"):
         await start_monitoring_tasks()
 
-        # デプロイ環境の情報を収集
-        env_info = {
-            "environment": os.getenv("APP_ENV", "production"),
-            "python_version": platform.python_version(),
-            "hostname": platform.node(),
-            "api_port": os.getenv("API_PORT", "8000"),
-            "elevenlabs_configured": bool(os.getenv("ELEVENLABS_API_KEY")),
-            "demo_ips": os.getenv("DEMO_IP_ADDRESSES", "未設定"),
-        }
+        # デプロイ環境の情報を収集（デプロイ時の通知を無効化）
+        # env_info = {
+        #     "environment": os.getenv("APP_ENV", "production"),
+        #     "python_version": platform.python_version(),
+        #     "hostname": platform.node(),
+        #     "api_port": os.getenv("API_PORT", "8000"),
+        #     "elevenlabs_configured": bool(os.getenv("ELEVENLABS_API_KEY")),
+        #     "demo_ips": os.getenv("DEMO_IP_ADDRESSES", "未設定"),
+        # }
 
-        # 起動通知を送信
-        startup_message = (
-            f"🚀 **AI Game Sound Generator が起動しました**\n"
-            f"• 環境: {env_info['environment']}\n"
-            f"• ホスト: {env_info['hostname']}\n"
-            f"• ポート: {env_info['api_port']}\n"
-            f"• ElevenLabs: {'✅ 設定済み' if env_info['elevenlabs_configured'] else '❌ 未設定'}\n"
-            f"• デモ機IP: {env_info['demo_ips']}"
-        )
-        await monitoring_service.send_alert("info", startup_message)
+        # 起動通知を送信（デプロイ時の通知を無効化）
+        # startup_message = (
+        #     f"🚀 **AI Game Sound Generator が起動しました**\n"
+        #     f"• 環境: {env_info['environment']}\n"
+        #     f"• ホスト: {env_info['hostname']}\n"
+        #     f"• ポート: {env_info['api_port']}\n"
+        #     f"• ElevenLabs: {'✅ 設定済み' if env_info['elevenlabs_configured'] else '❌ 未設定'}\n"
+        #     f"• デモ機IP: {env_info['demo_ips']}"
+        # )
+        # await monitoring_service.send_alert("info", startup_message)
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """アプリケーション停止時の処理。"""
-    # Slack通知を送信
-    if os.getenv("SLACK_WEBHOOK_URL"):
-        await monitoring_service.send_alert("warning", "⚠️ AI Game Sound Generator が停止します")
+    # Slack通知を送信（デプロイ時の通知を無効化）
+    # if os.getenv("SLACK_WEBHOOK_URL"):
+    #     await monitoring_service.send_alert("warning", "⚠️ AI Game Sound Generator が停止します")
 
     # セッションクリーンアップタスクを停止
     await session_manager.stop_cleanup_task()
