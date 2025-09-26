@@ -195,7 +195,7 @@ class MonitoringService:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"📊 *過去1時間の詳細（DB記録）*\n• 生成数: {db_stats.get('total_generations_1h', 0)}回\n• 成功率: {db_stats.get('success_count_1h', 0) * 100 // max(db_stats.get('total_generations_1h', 1), 1)}%\n• 平均生成時間: {db_stats.get('avg_generation_time_1h', 0)}秒\n• 平均タグ数: {db_stats.get('avg_tags_selected', 0)}個\n• デモ機生成: {db_stats.get('demo_count_1h', 0)}回",
+                        "text": f"📊 *過去1時間の詳細*\n• 生成数: {db_stats.get('total_generations_1h', 0)}回\n• 成功率: {db_stats.get('success_count_1h', 0) * 100 // max(db_stats.get('total_generations_1h', 1), 1)}%\n• 平均生成時間: {db_stats.get('avg_generation_time_1h', 0)}秒\n• 平均タグ数: {db_stats.get('avg_tags_selected', 0)}個\n• デモ機生成: {db_stats.get('demo_count_1h', 0)}回",
                     },
                 },
                 {
