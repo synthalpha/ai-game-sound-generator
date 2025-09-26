@@ -454,9 +454,14 @@ async def start_monitoring_tasks():
 
     async def hourly_task():
         """1時間ごとのタスク。"""
-        while True:
-            await asyncio.sleep(3600)  # 1時間
+        # 次の00分まで待機
+        now = datetime.now(JST)
+        if now.minute != 0 or now.second != 0:
+            next_hour = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+            wait_seconds = (next_hour - now).total_seconds()
+            await asyncio.sleep(wait_seconds)
 
+        while True:
             now = datetime.now(JST)
 
             if 9 <= now.hour < 19:
@@ -466,6 +471,9 @@ async def start_monitoring_tasks():
                     print(f"定期レポートエラー: {e}")
             else:
                 print(f"通知時間外: {now.hour}時（9:00-19:00のみ送信）")
+
+            # 1時間待機
+            await asyncio.sleep(3600)
 
     async def daily_task():
         """日次タスク。"""
