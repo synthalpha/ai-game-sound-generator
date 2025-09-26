@@ -453,14 +453,12 @@ async def start_monitoring_tasks():
     """モニタリングタスクを開始。"""
 
     async def hourly_task():
-        """1時間ごとのタスク（9:00-19:00のみ）。"""
+        """1時間ごとのタスク。"""
         while True:
             await asyncio.sleep(3600)  # 1時間
 
-            # 現在時刻をチェック（日本時間）
             now = datetime.now(JST)
 
-            # 9:00-19:00の間のみ通知を送信
             if 9 <= now.hour < 19:
                 try:
                     await monitoring_service.send_hourly_report()
@@ -474,13 +472,13 @@ async def start_monitoring_tasks():
         while True:
             now = datetime.now(JST)
 
-            if now.hour < 21:
-                next_9pm = now.replace(hour=21, minute=0, second=0, microsecond=0)
+            if now.hour < 20:
+                next_8pm = now.replace(hour=20, minute=0, second=0, microsecond=0)
             else:
                 tomorrow = now + timedelta(days=1)
-                next_9pm = tomorrow.replace(hour=21, minute=0, second=0, microsecond=0)
+                next_8pm = tomorrow.replace(hour=20, minute=0, second=0, microsecond=0)
 
-            wait_seconds = (next_9pm - now).total_seconds()
+            wait_seconds = (next_8pm - now).total_seconds()
             await asyncio.sleep(wait_seconds)
 
             try:
